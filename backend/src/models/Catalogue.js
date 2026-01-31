@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 const catalogueSchema = new mongoose.Schema(
   {
@@ -12,8 +12,8 @@ const catalogueSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: ['Products', 'Pricing', 'Support', 'Warranty', 'Other'],
-      default: 'Products',
+      enum: ["Products", "Pricing", "Support", "Warranty", "Other"],
+      default: "Products",
     },
     url: {
       type: String,
@@ -24,7 +24,7 @@ const catalogueSchema = new mongoose.Schema(
     },
     thumbnail: {
       type: String,
-      default: '📄',
+      default: "📄",
     },
     views: {
       type: Number,
@@ -38,4 +38,4 @@ const catalogueSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('Catalogue', catalogueSchema);
+export default mongoose.model("Catalogue", catalogueSchema);
