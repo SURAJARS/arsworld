@@ -1,4 +1,4 @@
-const express = require('express');
+import express from "express";
 const router = express.Router();
 const { adminAuth } = require('../middleware/auth');
 const settingsController = require('../controllers/settingsController');
@@ -8,3 +8,4 @@ router.get('/', settingsController.getSettings);
 router.put('/', settingsController.updateSettings);
 
 module.exports = router;
+
