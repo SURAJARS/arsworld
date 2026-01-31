@@ -17,9 +17,13 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: [
+    "http://localhost:5173",              // local frontend
+    "https://surajars.github.io"           // GitHub Pages domain
+  ],
   credentials: true,
 }));
+
 
 mongoose
   .connect(process.env.MONGODB_URI)
@@ -46,3 +50,4 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Backend server running on port ${PORT}`);
 });
+
