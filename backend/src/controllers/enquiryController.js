@@ -20,6 +20,7 @@ const createEnquiry = async (req, res) => {
         .json({ message: "Please provide name, email, and phone" });
     }
 
+    // 1️⃣ Save enquiry FIRST
     const enquiry = await Enquiry.create({
       user: req.user?.id || null,
       product: productId || null,
@@ -30,39 +31,43 @@ const createEnquiry = async (req, res) => {
       enquiryType: enquiryType || "contact-form",
     });
 
-    // Send email notification to owner
-    try {
-      const ownerEmail =
-        process.env.OWNER_EMAIL || "arselectronicsworld@gmail.com";
-
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: ownerEmail,
-        subject: `New Enquiry from ${name}`,
-        html: `
-          <h2>New Enquiry Received</h2>
-          <p><strong>Name:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Phone:</strong> ${phone}</p>
-          <p><strong>Type:</strong> ${enquiryType || "General"}</p>
-          <p><strong>Message:</strong></p>
-          <p>${message}</p>
-          <hr />
-          <p><small>Received at: ${new Date().toLocaleString()}</small></p>
-        `,
-      });
-
-      console.log("✓ Email sent to:", ownerEmail);
-    } catch (emailError) {
-      console.log("⚠ Email notification failed:", emailError.message);
-    }
-
-    return res.status(201).json({
-      message: "Enquiry created successfully and owner notified via email",
+    // 2️⃣ RESPOND IMMEDIATELY (CRITICAL FIX)
+    res.status(201).json({
+      message: "Enquiry submitted successfully",
       enquiry,
     });
+
+    // 3️⃣ SEND EMAIL IN BACKGROUND (NON-BLOCKING)
+    (async () => {
+      try {
+        const ownerEmail =
+          process.env.OWNER_EMAIL || "arselectronicsworld@gmail.com";
+
+        await transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: ownerEmail,
+          subject: `New Enquiry from ${name}`,
+          html: `
+            <h2>New Enquiry Received</h2>
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Phone:</strong> ${phone}</p>
+            <p><strong>Type:</strong> ${enquiryType || "General"}</p>
+            <p><strong>Message:</strong></p>
+            <p>${message || "-"}</p>
+            <hr />
+            <p><small>Received at: ${new Date().toLocaleString()}</small></p>
+          `,
+        });
+
+        console.log("✓ Enquiry email sent to:", ownerEmail);
+      } catch (emailError) {
+        console.error("⚠ Email notification failed:", emailError.message);
+      }
+    })();
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    console.error("❌ Enquiry error:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
