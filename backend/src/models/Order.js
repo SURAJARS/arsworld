@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema(
   {
@@ -9,14 +9,14 @@ const orderSchema = new mongoose.Schema(
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: false,
     },
     products: [
       {
         product: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: 'Product',
+          ref: "Product",
           required: true,
         },
         quantity: {
@@ -35,8 +35,8 @@ const orderSchema = new mongoose.Schema(
     },
     paymentStatus: {
       type: String,
-      enum: ['pending', 'success', 'failed'],
-      default: 'pending',
+      enum: ["pending", "success", "failed"],
+      default: "pending",
     },
     razorpayPaymentId: {
       type: String,
@@ -55,15 +55,11 @@ const orderSchema = new mongoose.Schema(
     },
     orderStatus: {
       type: String,
-      enum: ['placed', 'confirmed', 'shipped', 'delivered', 'cancelled'],
-      default: 'placed',
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now,
+      enum: ["placed", "confirmed", "shipped", "delivered", "cancelled"],
+      default: "placed",
     },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model('Order', orderSchema);
+export default mongoose.model("Order", orderSchema);
