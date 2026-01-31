@@ -1,0 +1,27 @@
+{
+  "name": "ars-electronics-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for ARS Electronics World - Online Appliance Store",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@next/bundle-analyzer": "^14.0.0",
+    "autoprefixer": "^10.4.16",
+    "axios": "^1.5.0",
+    "next": "^14.0.0",
+    "postcss": "^8.4.31",
+    "razorpay": "^2.9.6",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tailwindcss": "^3.3.5"
+  },
+  "devDependencies": {
+    "eslint": "^8.52.0",
+    "eslint-config-next": "^14.0.0"
+  }
+}
