@@ -1,20 +1,20 @@
-const User = require('../models/User');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
+import User from "../models/User.js";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 
-exports.register = async (req, res) => {
+const register = async (req, res) => {
   try {
     const { name, email, phone, password } = req.body;
 
     if (!name || !email || !phone || !password) {
       return res
         .status(400)
-        .json({ message: 'Please provide all required fields' });
+        .json({ message: "Please provide all required fields" });
     }
 
     const userExists = await User.findOne({ email });
     if (userExists) {
-      return res.status(400).json({ message: 'Email already in use' });
+      return res.status(400).json({ message: "Email already in use" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -32,8 +32,8 @@ exports.register = async (req, res) => {
       { expiresIn: process.env.JWT_EXPIRY }
     );
 
-    res.status(201).json({
-      message: 'User registered successfully',
+    return res.status(201).json({
+      message: "User registered successfully",
       token,
       user: {
         id: user._id,
@@ -44,28 +44,28 @@ exports.register = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 
-exports.login = async (req, res) => {
+const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
       return res
         .status(400)
-        .json({ message: 'Please provide email and password' });
+        .json({ message: "Please provide email and password" });
     }
 
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email }).select("+password");
     if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
     const token = jwt.sign(
@@ -74,8 +74,8 @@ exports.login = async (req, res) => {
       { expiresIn: process.env.JWT_EXPIRY }
     );
 
-    res.status(200).json({
-      message: 'Login successful',
+    return res.status(200).json({
+      message: "Login successful",
       token,
       user: {
         id: user._id,
@@ -87,36 +87,36 @@ exports.login = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 
-exports.updateLanguage = async (req, res) => {
+const updateLanguage = async (req, res) => {
   try {
     const { language } = req.body;
 
-    if (!['en', 'ta'].includes(language)) {
-      return res.status(400).json({ message: 'Invalid language' });
+    if (!["en", "ta"].includes(language)) {
+      return res.status(400).json({ message: "Invalid language" });
     }
 
     await User.findByIdAndUpdate(req.user.id, { language });
 
-    res.status(200).json({ message: 'Language updated successfully' });
+    return res.status(200).json({ message: "Language updated successfully" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 
-exports.getProfile = async (req, res) => {
+const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
-    res.status(200).json(user);
+    return res.status(200).json(user);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 
-exports.updateProfile = async (req, res) => {
+const updateProfile = async (req, res) => {
   try {
     const { name, phone } = req.body;
 
@@ -126,11 +126,19 @@ exports.updateProfile = async (req, res) => {
       { new: true }
     );
 
-    res.status(200).json({
-      message: 'Profile updated successfully',
+    return res.status(200).json({
+      message: "Profile updated successfully",
       user,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
+};
+
+export default {
+  register,
+  login,
+  updateLanguage,
+  getProfile,
+  updateProfile,
 };
