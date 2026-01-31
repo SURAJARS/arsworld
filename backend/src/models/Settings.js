@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 const settingsSchema = new mongoose.Schema(
   {
@@ -9,16 +9,16 @@ const settingsSchema = new mongoose.Schema(
     festivalBannerText: {
       en: {
         type: String,
-        default: 'Celebrate with us!',
+        default: "Celebrate with us!",
       },
       ta: {
         type: String,
-        default: 'எங்களுடன் கொண்டாடவும்!',
+        default: "எங்களுடன் கொண்டாடவும்!",
       },
     },
     shopName: {
       type: String,
-      default: 'ARS Electronics World',
+      default: "ARS Electronics World",
     },
     shopPhone: {
       type: String,
@@ -30,7 +30,7 @@ const settingsSchema = new mongoose.Schema(
     },
     shopLocation: {
       type: String,
-      default: 'Krishnagiri',
+      default: "Krishnagiri",
     },
     googleMapsEmbed: {
       type: String,
@@ -42,4 +42,4 @@ const settingsSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('Settings', settingsSchema);
+export default mongoose.model("Settings", settingsSchema);
