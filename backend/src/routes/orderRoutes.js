@@ -1,4 +1,4 @@
-const express = require('express');
+import express from "express";
 const router = express.Router();
 const { auth, adminAuth } = require('../middleware/auth');
 const orderController = require('../controllers/orderController');
@@ -12,3 +12,4 @@ router.get('/:id', auth, orderController.getOrderById);
 router.put('/:id/status', adminAuth, orderController.updateOrderStatus);
 
 module.exports = router;
+
