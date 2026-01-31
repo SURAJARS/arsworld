@@ -21,31 +21,45 @@ app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 /* =========================
-   CORS CONFIG (FIXED)
+   CORS CONFIG (FINAL FIX)
 ========================= */
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:5173",
-  "https://arsworld.vercel.app",
-  "https://arsworld-mveckvjxk-arsworlds-projects.vercel.app"
+
+  // GitHub Pages
+  "https://surajars.github.io",
+
+  // Vercel (ALL preview + prod)
+  /^https:\/\/.*\.vercel\.app$/,
 ];
 
 app.use(
   cors({
     origin: (origin, callback) => {
+      // Allow server-to-server, curl, postman
       if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
+
+      const isAllowed = allowedOrigins.some((allowed) =>
+        allowed instanceof RegExp
+          ? allowed.test(origin)
+          : allowed === origin
+      );
+
+      if (isAllowed) {
         return callback(null, true);
       }
-      return callback(new Error("CORS not allowed"));
+
+      console.error("❌ CORS blocked origin:", origin);
+      return callback(new Error("Not allowed by CORS"));
     },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true
+    credentials: true,
   })
 );
 
-// 🔥 PRE-FLIGHT FIX (VERY IMPORTANT)
+// 🔥 PRE-FLIGHT FIX (MANDATORY)
 app.options("*", cors());
 
 /* =========================
@@ -66,7 +80,7 @@ app.get("/api/health", (req, res) => {
    ERROR HANDLER
 ========================= */
 app.use((err, req, res, next) => {
-  console.error(err.message);
+  console.error("❌ Error:", err.message);
   res.status(500).json({ message: err.message || "Internal server error" });
 });
 
