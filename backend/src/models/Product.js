@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 const productSchema = new mongoose.Schema(
   {
@@ -24,17 +24,17 @@ const productSchema = new mongoose.Schema(
     },
     price: {
       type: Number,
-      required: [true, 'Please provide price'],
+      required: [true, "Please provide price"],
     },
     useCases: [
       {
         type: String,
         enum: [
-          'small_families',
-          'large_families',
-          'energy_saving',
-          'premium',
-          'popular',
+          "small_families",
+          "large_families",
+          "energy_saving",
+          "premium",
+          "popular",
         ],
       },
     ],
@@ -56,12 +56,8 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model('Product', productSchema);
+export default mongoose.model("Product", productSchema);
