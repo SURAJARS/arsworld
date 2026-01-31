@@ -1,3 +1,31 @@
+import cors from "cors";
+
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://arsworld.vercel.app",
+  "https://arsworld-mveckvjxk-arsworlds-projects.vercel.app"
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow REST tools / server-to-server
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("CORS not allowed"));
+    }
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
+
+// VERY IMPORTANT (preflight fix)
+app.options("*", cors());
+
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -51,5 +79,6 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Backend server running on port ${PORT}`);
 });
+
 
 
