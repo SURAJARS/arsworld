@@ -1,11 +1,12 @@
 import express from "express";
+import { adminAuth } from "../middleware/auth.js";
+import settingsController from "../controllers/settingsController.js";
+
 const router = express.Router();
-const { adminAuth } = require('../middleware/auth');
-const settingsController = require('../controllers/settingsController');
 
-router.get('/', settingsController.getSettings);
+router.get("/", settingsController.getSettings);
+
 // TODO: Re-enable adminAuth after proper admin setup
-router.put('/', settingsController.updateSettings);
+router.put("/", settingsController.updateSettings);
 
-module.exports = router;
-
+export default router;
