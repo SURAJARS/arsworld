@@ -18,7 +18,8 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 app.use(cors({
   origin: [
-    "http://localhost:5173",              // local frontend
+    "http://localhost:5173", 
+    "https://arsworld-mveckvjxk-arsworlds-projects.vercel.app/",// local frontend
     "https://surajars.github.io"           // GitHub Pages domain
   ],
   credentials: true,
@@ -50,4 +51,5 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Backend server running on port ${PORT}`);
 });
+
 
