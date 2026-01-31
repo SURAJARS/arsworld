@@ -1,14 +1,14 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 const enquirySchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
     },
     product: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Product',
+      ref: "Product",
       required: false,
     },
     name: {
@@ -28,20 +28,16 @@ const enquirySchema = new mongoose.Schema(
     },
     enquiryType: {
       type: String,
-      enum: ['call', 'whatsapp', 'email', 'contact-form'],
-      default: 'contact-form',
+      enum: ["call", "whatsapp", "email", "contact-form"],
+      default: "contact-form",
     },
     status: {
       type: String,
-      enum: ['pending', 'contacted', 'resolved'],
-      default: 'pending',
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now,
+      enum: ["pending", "contacted", "resolved"],
+      default: "pending",
     },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model('Enquiry', enquirySchema);
+export default mongoose.model("Enquiry", enquirySchema);
