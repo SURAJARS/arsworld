@@ -1,6 +1,7 @@
 {
   "name": "ars-electronics-frontend",
   "version": "1.0.0",
+  "homepage": "https://surajars.github.io/arsworld",
   "description": "Frontend for ARS Electronics World - Online Appliance Store",
   "private": true,
   "scripts": {
@@ -25,3 +26,4 @@
     "eslint-config-next": "^14.0.0"
   }
 }
+
