@@ -1,84 +1,84 @@
+import express from "express";
+import mongoose from "mongoose";
 import cors from "cors";
+import dotenv from "dotenv";
 
+import authRoutes from "./routes/authRoutes.js";
+import productRoutes from "./routes/productRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
+import enquiryRoutes from "./routes/enquiryRoutes.js";
+import settingsRoutes from "./routes/settingsRoutes.js";
+import catalogueRoutes from "./routes/catalogueRoutes.js";
+
+dotenv.config();
+
+const app = express();
+
+/* =========================
+   BODY PARSERS
+========================= */
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
+
+/* =========================
+   CORS CONFIG (FIXED)
+========================= */
 const allowedOrigins = [
   "http://localhost:3000",
+  "http://localhost:5173",
   "https://arsworld.vercel.app",
   "https://arsworld-mveckvjxk-arsworlds-projects.vercel.app"
 ];
 
-app.use(cors({
-  origin: function (origin, callback) {
-    // allow REST tools / server-to-server
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
       return callback(new Error("CORS not allowed"));
-    }
-  },
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
-}));
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true
+  })
+);
 
-// VERY IMPORTANT (preflight fix)
+// 🔥 PRE-FLIGHT FIX (VERY IMPORTANT)
 app.options("*", cors());
 
+/* =========================
+   ROUTES
+========================= */
+app.use("/api/auth", authRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/enquiries", enquiryRoutes);
+app.use("/api/settings", settingsRoutes);
+app.use("/api/catalogues", catalogueRoutes);
 
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-require('dotenv').config();
+app.get("/api/health", (req, res) => {
+  res.json({ message: "Server is running" });
+});
 
-const authRoutes = require('./routes/authRoutes');
-const productRoutes = require('./routes/productRoutes');
-const orderRoutes = require('./routes/orderRoutes');
-const enquiryRoutes = require('./routes/enquiryRoutes');
-const settingsRoutes = require('./routes/settingsRoutes');
-const catalogueRoutes = require('./routes/catalogueRoutes');
+/* =========================
+   ERROR HANDLER
+========================= */
+app.use((err, req, res, next) => {
+  console.error(err.message);
+  res.status(500).json({ message: err.message || "Internal server error" });
+});
 
-const app = express();
-
-// Increase payload size limit for large image uploads
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
-
-app.use(cors({
-  origin: [
-    "http://localhost:5173", 
-    "https://arsworld-mveckvjxk-arsworlds-projects.vercel.app/",// local frontend
-    "https://surajars.github.io"           // GitHub Pages domain
-  ],
-  credentials: true,
-}));
-
-
+/* =========================
+   DB + SERVER
+========================= */
 mongoose
   .connect(process.env.MONGODB_URI)
-  .then(() => console.log('MongoDB connected'))
-  .catch((err) => console.log('MongoDB connection error:', err));
-
-app.use('/api/auth', authRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/enquiries', enquiryRoutes);
-app.use('/api/settings', settingsRoutes);
-app.use('/api/catalogues', catalogueRoutes);
-
-app.get('/api/health', (req, res) => {
-  res.json({ message: 'Server is running' });
-});
-
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Internal server error' });
-});
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.error("MongoDB error:", err));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Backend server running on port ${PORT}`);
 });
-
-
-
