@@ -1,4 +1,4 @@
-const express = require('express');
+import express from "express";
 const router = express.Router();
 const catalogueController = require('../controllers/catalogueController');
 const { adminAuth } = require('../middleware/auth');
@@ -15,3 +15,4 @@ router.put('/:id', adminAuth, catalogueController.updateCatalogue);
 router.delete('/:id', adminAuth, catalogueController.deleteCatalogue);
 
 module.exports = router;
+
