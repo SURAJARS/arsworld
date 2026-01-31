@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Backend for ARS Electronics World - Online Appliance Store",
   "main": "src/server.js",
+  "type": "module",
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js"
@@ -31,3 +32,4 @@
     "nodemon": "^3.0.1"
   }
 }
+
