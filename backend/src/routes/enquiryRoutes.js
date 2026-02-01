@@ -12,7 +12,7 @@ const router = express.Router();
 /* PUBLIC */
 router.post("/create", createEnquiry);
 
-/* ADMIN (auth can be added later) */
+/* ADMIN */
 router.get("/", getEnquiries);
 router.put("/:id/status", adminAuth, updateEnquiryStatus);
 router.delete("/:id", adminAuth, deleteEnquiry);
