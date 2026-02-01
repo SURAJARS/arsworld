@@ -1,15 +1,20 @@
 import express from "express";
 import { adminAuth } from "../middleware/auth.js";
-import enquiryController from "../controllers/enquiryController.js";
+import {
+  createEnquiry,
+  getEnquiries,
+  updateEnquiryStatus,
+  deleteEnquiry,
+} from "../controllers/enquiryController.js";
 
 const router = express.Router();
 
-router.post("/create", enquiryController.createEnquiry);
+/* PUBLIC */
+router.post("/create", createEnquiry);
 
-// TODO: Re-enable adminAuth after proper admin setup
-router.get("/", enquiryController.getEnquiries);
-
-router.put("/:id/status", adminAuth, enquiryController.updateEnquiryStatus);
-router.delete("/:id", adminAuth, enquiryController.deleteEnquiry);
+/* ADMIN (auth can be added later) */
+router.get("/", getEnquiries);
+router.put("/:id/status", adminAuth, updateEnquiryStatus);
+router.delete("/:id", adminAuth, deleteEnquiry);
 
 export default router;
