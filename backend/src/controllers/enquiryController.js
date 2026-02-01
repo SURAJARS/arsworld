@@ -1,26 +1,32 @@
 import Enquiry from "../models/Enquiry.js";
 import nodemailer from "nodemailer";
 
-// Setup email transporter
+/* =========================
+   BREVO SMTP TRANSPORT
+========================= */
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: process.env.SMTP_HOST,        // smtp-relay.brevo.com
+  port: Number(process.env.SMTP_PORT),// 587
+  secure: false,                      // TLS
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
   },
 });
 
-const createEnquiry = async (req, res) => {
+/* =========================
+   CREATE ENQUIRY
+========================= */
+export const createEnquiry = async (req, res) => {
   try {
     const { productId, name, email, phone, message, enquiryType } = req.body;
 
     if (!name || !email || !phone) {
-      return res
-        .status(400)
-        .json({ message: "Please provide name, email, and phone" });
+      return res.status(400).json({
+        message: "Name, email and phone are required",
+      });
     }
 
-    // 1️⃣ Save enquiry FIRST
     const enquiry = await Enquiry.create({
       user: req.user?.id || null,
       product: productId || null,
@@ -31,67 +37,65 @@ const createEnquiry = async (req, res) => {
       enquiryType: enquiryType || "contact-form",
     });
 
-    // 2️⃣ RESPOND IMMEDIATELY (CRITICAL FIX)
-    res.status(201).json({
+    /* =========================
+       SEND EMAIL (BREVO)
+    ========================= */
+    try {
+      await transporter.sendMail({
+        from: `"ARS Electronics" <${process.env.SMTP_USER}>`,
+        to: process.env.OWNER_EMAIL,
+        replyTo: email,
+        subject: `📩 New Enquiry from ${name}`,
+        html: `
+          <h2>New Enquiry Received</h2>
+          <p><b>Name:</b> ${name}</p>
+          <p><b>Email:</b> ${email}</p>
+          <p><b>Phone:</b> ${phone}</p>
+          <p><b>Type:</b> ${enquiryType || "Contact Form"}</p>
+          <p><b>Message:</b></p>
+          <p>${message || "-"}</p>
+          <hr/>
+          <small>Received at ${new Date().toLocaleString()}</small>
+        `,
+      });
+
+      console.log("✅ Brevo email sent");
+    } catch (mailErr) {
+      console.error("❌ Brevo mail failed:", mailErr.message);
+    }
+
+    return res.status(201).json({
       message: "Enquiry submitted successfully",
       enquiry,
     });
-
-    // 3️⃣ SEND EMAIL IN BACKGROUND (NON-BLOCKING)
-    (async () => {
-      try {
-        const ownerEmail =
-          process.env.OWNER_EMAIL || "arselectronicsworld@gmail.com";
-
-        await transporter.sendMail({
-          from: process.env.EMAIL_USER,
-          to: ownerEmail,
-          subject: `New Enquiry from ${name}`,
-          html: `
-            <h2>New Enquiry Received</h2>
-            <p><strong>Name:</strong> ${name}</p>
-            <p><strong>Email:</strong> ${email}</p>
-            <p><strong>Phone:</strong> ${phone}</p>
-            <p><strong>Type:</strong> ${enquiryType || "General"}</p>
-            <p><strong>Message:</strong></p>
-            <p>${message || "-"}</p>
-            <hr />
-            <p><small>Received at: ${new Date().toLocaleString()}</small></p>
-          `,
-        });
-
-        console.log("✓ Enquiry email sent to:", ownerEmail);
-      } catch (emailError) {
-        console.error("⚠ Email notification failed:", emailError.message);
-      }
-    })();
-  } catch (error) {
-    console.error("❌ Enquiry error:", error);
-    return res.status(500).json({ message: "Internal server error" });
+  } catch (err) {
+    console.error("❌ Enquiry error:", err);
+    return res.status(500).json({ message: "Server error" });
   }
 };
 
-const getEnquiries = async (req, res) => {
+/* =========================
+   GET ALL ENQUIRIES
+========================= */
+export const getEnquiries = async (req, res) => {
   try {
     const enquiries = await Enquiry.find()
       .populate("product")
       .populate("user")
       .sort({ createdAt: -1 });
 
-    return res.status(200).json(enquiries);
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
+    res.json(enquiries);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-const updateEnquiryStatus = async (req, res) => {
+/* =========================
+   UPDATE STATUS
+========================= */
+export const updateEnquiryStatus = async (req, res) => {
   try {
     const { status } = req.body;
-
-    const validStatuses = ["pending", "contacted", "resolved"];
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({ message: "Invalid status" });
-    }
 
     const enquiry = await Enquiry.findByIdAndUpdate(
       req.params.id,
@@ -103,34 +107,20 @@ const updateEnquiryStatus = async (req, res) => {
       return res.status(404).json({ message: "Enquiry not found" });
     }
 
-    return res.status(200).json({
-      message: "Enquiry status updated successfully",
-      enquiry,
-    });
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
+    res.json({ message: "Status updated", enquiry });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-const deleteEnquiry = async (req, res) => {
+/* =========================
+   DELETE
+========================= */
+export const deleteEnquiry = async (req, res) => {
   try {
-    const enquiry = await Enquiry.findByIdAndDelete(req.params.id);
-
-    if (!enquiry) {
-      return res.status(404).json({ message: "Enquiry not found" });
-    }
-
-    return res.status(200).json({
-      message: "Enquiry deleted successfully",
-    });
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
+    await Enquiry.findByIdAndDelete(req.params.id);
+    res.json({ message: "Enquiry deleted" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
-};
-
-export default {
-  createEnquiry,
-  getEnquiries,
-  updateEnquiryStatus,
-  deleteEnquiry,
 };
