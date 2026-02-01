@@ -1,14 +1,20 @@
 import Enquiry from "../models/Enquiry.js";
-import SibApiV3Sdk from "sib-api-v3-sdk";
+import nodemailer from "nodemailer";
 
 /* =========================
-   BREVO API CONFIG
+   BREVO SMTP TRANSPORT
 ========================= */
-const brevoClient = SibApiV3Sdk.ApiClient.instance;
-const apiKey = brevoClient.authentications["api-key"];
-apiKey.apiKey = process.env.BREVO_API_KEY;
-
-const transactionalApi = new SibApiV3Sdk.TransactionalEmailsApi();
+const transporter = nodemailer.createTransport({
+  host: process.env.BREVO_SMTP_HOST,
+  port: Number(process.env.BREVO_SMTP_PORT),
+  secure: false, // MUST be false for port 587
+  auth: {
+    user: process.env.BREVO_SMTP_USER,
+    pass: process.env.BREVO_SMTP_PASS,
+  },
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+});
 
 /* =========================
    CREATE ENQUIRY
@@ -21,7 +27,7 @@ export const createEnquiry = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    /* 1️⃣ SAVE ENQUIRY */
+    // 1️⃣ Save enquiry
     const enquiry = await Enquiry.create({
       user: req.user?.id || null,
       product: productId || null,
@@ -32,47 +38,38 @@ export const createEnquiry = async (req, res) => {
       enquiryType: enquiryType || "contact-form",
     });
 
-    /* 2️⃣ RESPOND IMMEDIATELY (NO UI HANG) */
+    // 2️⃣ Respond immediately (DO NOT WAIT FOR EMAIL)
     res.status(201).json({
       message: "Enquiry submitted successfully",
       enquiryId: enquiry._id,
     });
 
-    /* 3️⃣ SEND EMAIL ASYNC (NON-BLOCKING) */
-    const emailData = {
-      sender: {
-        name: "ARS Electronics",
-        email: "no-reply@arsworld.com", // can be any verified sender
-      },
-      to: [
-        {
-          email: process.env.OWNER_EMAIL,
-          name: "Store Owner",
-        },
-      ],
+    // 3️⃣ Send email asynchronously
+    transporter.sendMail({
+      from: `"ARS Electronics" <${process.env.BREVO_SMTP_USER}>`,
+      to: process.env.OWNER_EMAIL,
+      replyTo: email,
       subject: `📩 New Enquiry from ${name}`,
-      htmlContent: `
-        <h2>New Enquiry Received</h2>
+      html: `
+        <h2>New Enquiry</h2>
         <p><strong>Name:</strong> ${name}</p>
         <p><strong>Email:</strong> ${email}</p>
         <p><strong>Phone:</strong> ${phone}</p>
-        <p><strong>Type:</strong> ${enquiryType || "General"}</p>
-        <p><strong>Message:</strong></p>
-        <p>${message || "-"}</p>
+        <p><strong>Message:</strong> ${message || "-"}</p>
         <hr/>
         <small>${new Date().toLocaleString()}</small>
       `,
-    };
+    })
+    .then(() => console.log("✅ Brevo SMTP email sent"))
+    .catch(err =>
+      console.error("⚠️ Brevo SMTP failed:", err.message)
+    );
 
-    transactionalApi
-      .sendTransacEmail(emailData)
-      .then(() => console.log("✅ Brevo email sent successfully"))
-      .catch((err) =>
-        console.error("⚠️ Brevo email failed:", err?.response?.body || err.message)
-      );
   } catch (err) {
     console.error("❌ Enquiry error:", err);
-    return res.status(500).json({ message: "Server error" });
+    if (!res.headersSent) {
+      res.status(500).json({ message: "Server error" });
+    }
   }
 };
 
