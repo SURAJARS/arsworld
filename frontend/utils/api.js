@@ -1,16 +1,14 @@
 import axios from "axios";
 
 /**
- * IMPORTANT:
- * This project uses Vite.
- * So environment variables MUST come from import.meta.env
- * and MUST start with VITE_
+ * NEXT.JS ENV ACCESS
+ * Must start with NEXT_PUBLIC_
  */
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 if (!API_BASE_URL) {
   throw new Error(
-    "❌ VITE_API_BASE_URL is not defined. Check your environment variables."
+    "❌ NEXT_PUBLIC_API_BASE_URL is not defined. Check Vercel Environment Variables."
   );
 }
 
@@ -19,9 +17,9 @@ const api = axios.create({
   withCredentials: true,
 });
 
-/**
- * Attach JWT token if present (client-side only)
- */
+/* =========================
+   Attach JWT if exists
+========================= */
 api.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
     const token = localStorage.getItem("token");
@@ -33,7 +31,7 @@ api.interceptors.request.use((config) => {
 });
 
 /* =========================
-   AUTH API
+   AUTH
 ========================= */
 export const authAPI = {
   register: (data) => api.post("/auth/register", data),
@@ -45,7 +43,7 @@ export const authAPI = {
 };
 
 /* =========================
-   PRODUCT API
+   PRODUCTS
 ========================= */
 export const productAPI = {
   getAll: (params) => api.get("/products", { params }),
@@ -64,19 +62,12 @@ export const productAPI = {
 };
 
 /* =========================
-   ORDER API
+   ORDERS
 ========================= */
 export const orderAPI = {
-  // Guest checkout (NO AUTH REQUIRED)
   create: (data) => api.post("/orders/create", data),
-
-  // Razorpay verification
   verify: (data) => api.post("/orders/verify", data),
-
-  // User orders
   getUserOrders: () => api.get("/orders/my-orders"),
-
-  // Admin
   getAllOrders: () => api.get("/orders/all-orders"),
   getById: (id) => api.get(`/orders/${id}`),
   updateStatus: (id, status) =>
@@ -86,7 +77,7 @@ export const orderAPI = {
 };
 
 /* =========================
-   ENQUIRY API
+   ENQUIRIES
 ========================= */
 export const enquiryAPI = {
   create: (data) => api.post("/enquiries/create", data),
@@ -97,7 +88,7 @@ export const enquiryAPI = {
 };
 
 /* =========================
-   SETTINGS API
+   SETTINGS
 ========================= */
 export const settingsAPI = {
   get: () => api.get("/settings"),
