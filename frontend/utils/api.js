@@ -1,32 +1,40 @@
 import axios from "axios";
 
-/**
- * 🔒 SINGLE SOURCE OF TRUTH
- * Backend API (Render)
- */
+/* =====================================================
+   SINGLE SOURCE OF TRUTH (DO NOT CHANGE IN COMPONENTS)
+===================================================== */
 const API_BASE_URL = "https://arsworld.onrender.com/api";
 
+/* =====================================================
+   AXIOS INSTANCE
+===================================================== */
 const api = axios.create({
   baseURL: API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
   withCredentials: true,
 });
 
-/* =========================
-   AUTH TOKEN
-========================= */
-api.interceptors.request.use((config) => {
-  if (typeof window !== "undefined") {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+/* =====================================================
+   AUTH TOKEN INTERCEPTOR
+===================================================== */
+api.interceptors.request.use(
+  (config) => {
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("token");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
-  }
-  return config;
-});
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
-/* =========================
-   AUTH
-========================= */
+/* =====================================================
+   AUTH APIs
+===================================================== */
 export const authAPI = {
   register: (data) => api.post("/auth/register", data),
   login: (data) => api.post("/auth/login", data),
@@ -36,13 +44,12 @@ export const authAPI = {
     api.put("/auth/update-language", { language }),
 };
 
-/* =========================
-   PRODUCTS
-========================= */
+/* =====================================================
+   PRODUCT APIs
+===================================================== */
 export const productAPI = {
   getAll: (params) => api.get("/products", { params }),
-  getAllAdmin: (params) =>
-    api.get("/products/admin/all", { params }),
+  getAllAdmin: (params) => api.get("/products/admin/all", { params }),
   getById: (id) => api.get(`/products/${id}`),
   getByUseCase: (useCase) =>
     api.get(`/products/use-case/${useCase}`),
@@ -50,14 +57,13 @@ export const productAPI = {
   compare: (productIds) =>
     api.post("/products/compare", { productIds }),
   create: (data) => api.post("/products", data),
-  update: (id, data) =>
-    api.put(`/products/${id}`, data),
+  update: (id, data) => api.put(`/products/${id}`, data),
   delete: (id) => api.delete(`/products/${id}`),
 };
 
-/* =========================
-   ORDERS
-========================= */
+/* =====================================================
+   ORDER APIs
+===================================================== */
 export const orderAPI = {
   create: (data) => api.post("/orders/create", data),
   verify: (data) => api.post("/orders/verify", data),
@@ -65,14 +71,12 @@ export const orderAPI = {
   getAllOrders: () => api.get("/orders/all-orders"),
   getById: (id) => api.get(`/orders/${id}`),
   updateStatus: (id, status) =>
-    api.put(`/orders/${id}/status`, {
-      orderStatus: status,
-    }),
+    api.put(`/orders/${id}/status`, { orderStatus: status }),
 };
 
-/* =========================
-   ENQUIRIES
-========================= */
+/* =====================================================
+   ENQUIRY APIs
+===================================================== */
 export const enquiryAPI = {
   create: (data) => api.post("/enquiries/create", data),
   getAll: () => api.get("/enquiries"),
@@ -81,12 +85,22 @@ export const enquiryAPI = {
   delete: (id) => api.delete(`/enquiries/${id}`),
 };
 
-/* =========================
-   SETTINGS
-========================= */
+/* =====================================================
+   SETTINGS APIs
+===================================================== */
 export const settingsAPI = {
   get: () => api.get("/settings"),
   update: (data) => api.put("/settings", data),
 };
 
+/* =====================================================
+   CATALOGUE APIs
+===================================================== */
+export const catalogueAPI = {
+  getAll: () => api.get("/catalogues"),
+};
+
+/* =====================================================
+   DEFAULT EXPORT
+===================================================== */
 export default api;
