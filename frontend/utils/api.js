@@ -1,14 +1,14 @@
 import axios from "axios";
 
 /**
- * NEXT.JS ENV ACCESS
- * Must start with NEXT_PUBLIC_
+ * SINGLE SOURCE OF TRUTH
+ * NO FALLBACKS
  */
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 if (!API_BASE_URL) {
   throw new Error(
-    "❌ NEXT_PUBLIC_API_BASE_URL is not defined. Check Vercel Environment Variables."
+    "❌ NEXT_PUBLIC_API_BASE_URL is missing. Set it in Vercel Environment Variables."
   );
 }
 
@@ -18,7 +18,7 @@ const api = axios.create({
 });
 
 /* =========================
-   Attach JWT if exists
+   AUTH TOKEN
 ========================= */
 api.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
@@ -62,7 +62,7 @@ export const productAPI = {
 };
 
 /* =========================
-   ORDERS
+   ORDERS (GUEST CHECKOUT OK)
 ========================= */
 export const orderAPI = {
   create: (data) => api.post("/orders/create", data),
