@@ -20,7 +20,6 @@ export const createEnquiry = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // 1️⃣ Save enquiry immediately
     const enquiry = await Enquiry.create({
       user: req.user?.id || null,
       product: productId || null,
@@ -31,16 +30,19 @@ export const createEnquiry = async (req, res) => {
       enquiryType: enquiryType || "contact-form",
     });
 
-    // 2️⃣ Respond immediately (NO waiting)
+    // respond immediately
     res.status(201).json({
       message: "Enquiry submitted successfully",
       enquiryId: enquiry._id,
     });
 
-    // 3️⃣ Send email async via API (safe on Render)
+    // async email
     emailApi
       .sendTransacEmail({
-        sender: { name: "ARS Electronics", email: process.env.OWNER_EMAIL },
+        sender: {
+          name: "ARS Electronics",
+          email: process.env.OWNER_EMAIL,
+        },
         to: [{ email: process.env.OWNER_EMAIL }],
         subject: `📩 New Enquiry from ${name}`,
         htmlContent: `
@@ -49,8 +51,6 @@ export const createEnquiry = async (req, res) => {
           <p><b>Email:</b> ${email}</p>
           <p><b>Phone:</b> ${phone}</p>
           <p><b>Message:</b> ${message || "-"}</p>
-          <hr/>
-          <small>${new Date().toLocaleString()}</small>
         `,
       })
       .then(() => console.log("✅ Brevo API email sent"))
@@ -59,5 +59,40 @@ export const createEnquiry = async (req, res) => {
       );
   } catch (err) {
     console.error("❌ Enquiry error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+/* =========================
+   ADMIN APIs
+========================= */
+export const getEnquiries = async (req, res) => {
+  try {
+    const enquiries = await Enquiry.find().sort({ createdAt: -1 });
+    res.json(enquiries);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+export const updateEnquiryStatus = async (req, res) => {
+  try {
+    const enquiry = await Enquiry.findByIdAndUpdate(
+      req.params.id,
+      { status: req.body.status },
+      { new: true }
+    );
+    res.json(enquiry);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+export const deleteEnquiry = async (req, res) => {
+  try {
+    await Enquiry.findByIdAndDelete(req.params.id);
+    res.json({ message: "Enquiry deleted" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
