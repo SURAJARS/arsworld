@@ -1,14 +1,13 @@
 import axios from "axios";
 
 /**
- * SINGLE SOURCE OF TRUTH
- * NO FALLBACKS
+ * VITE ENV — SINGLE SOURCE OF TRUTH
  */
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 if (!API_BASE_URL) {
   throw new Error(
-    "❌ NEXT_PUBLIC_API_BASE_URL is missing. Set it in Vercel Environment Variables."
+    "❌ VITE_API_BASE_URL is missing. Set it in Vercel Environment Variables."
   );
 }
 
@@ -21,11 +20,9 @@ const api = axios.create({
    AUTH TOKEN
 ========================= */
 api.interceptors.request.use((config) => {
-  if (typeof window !== "undefined") {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
@@ -62,7 +59,7 @@ export const productAPI = {
 };
 
 /* =========================
-   ORDERS (GUEST CHECKOUT OK)
+   ORDERS
 ========================= */
 export const orderAPI = {
   create: (data) => api.post("/orders/create", data),
