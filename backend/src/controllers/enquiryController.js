@@ -1,20 +1,13 @@
 import Enquiry from "../models/Enquiry.js";
-import nodemailer from "nodemailer";
+import SibApiV3Sdk from "sib-api-v3-sdk";
 
 /* =========================
-   BREVO SMTP TRANSPORT
+   BREVO API SETUP
 ========================= */
-const transporter = nodemailer.createTransport({
-  host: process.env.BREVO_SMTP_HOST,
-  port: Number(process.env.BREVO_SMTP_PORT),
-  secure: false, // MUST be false for port 587
-  auth: {
-    user: process.env.BREVO_SMTP_USER,
-    pass: process.env.BREVO_SMTP_PASS,
-  },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-});
+const client = SibApiV3Sdk.ApiClient.instance;
+client.authentications["api-key"].apiKey = process.env.BREVO_API_KEY;
+
+const emailApi = new SibApiV3Sdk.TransactionalEmailsApi();
 
 /* =========================
    CREATE ENQUIRY
@@ -27,7 +20,7 @@ export const createEnquiry = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // 1️⃣ Save enquiry
+    // 1️⃣ Save enquiry immediately
     const enquiry = await Enquiry.create({
       user: req.user?.id || null,
       product: productId || null,
@@ -38,71 +31,33 @@ export const createEnquiry = async (req, res) => {
       enquiryType: enquiryType || "contact-form",
     });
 
-    // 2️⃣ Respond immediately (DO NOT WAIT FOR EMAIL)
+    // 2️⃣ Respond immediately (NO waiting)
     res.status(201).json({
       message: "Enquiry submitted successfully",
       enquiryId: enquiry._id,
     });
 
-    // 3️⃣ Send email asynchronously
-    transporter.sendMail({
-      from: `"ARS Electronics" <${process.env.BREVO_SMTP_USER}>`,
-      to: process.env.OWNER_EMAIL,
-      replyTo: email,
-      subject: `📩 New Enquiry from ${name}`,
-      html: `
-        <h2>New Enquiry</h2>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Phone:</strong> ${phone}</p>
-        <p><strong>Message:</strong> ${message || "-"}</p>
-        <hr/>
-        <small>${new Date().toLocaleString()}</small>
-      `,
-    })
-    .then(() => console.log("✅ Brevo SMTP email sent"))
-    .catch(err =>
-      console.error("⚠️ Brevo SMTP failed:", err.message)
-    );
-
+    // 3️⃣ Send email async via API (safe on Render)
+    emailApi
+      .sendTransacEmail({
+        sender: { name: "ARS Electronics", email: process.env.OWNER_EMAIL },
+        to: [{ email: process.env.OWNER_EMAIL }],
+        subject: `📩 New Enquiry from ${name}`,
+        htmlContent: `
+          <h2>New Enquiry</h2>
+          <p><b>Name:</b> ${name}</p>
+          <p><b>Email:</b> ${email}</p>
+          <p><b>Phone:</b> ${phone}</p>
+          <p><b>Message:</b> ${message || "-"}</p>
+          <hr/>
+          <small>${new Date().toLocaleString()}</small>
+        `,
+      })
+      .then(() => console.log("✅ Brevo API email sent"))
+      .catch((err) =>
+        console.error("⚠️ Brevo API email failed:", err.message)
+      );
   } catch (err) {
     console.error("❌ Enquiry error:", err);
-    if (!res.headersSent) {
-      res.status(500).json({ message: "Server error" });
-    }
-  }
-};
-
-/* =========================
-   ADMIN APIs
-========================= */
-export const getEnquiries = async (req, res) => {
-  try {
-    const enquiries = await Enquiry.find().sort({ createdAt: -1 });
-    res.json(enquiries);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-export const updateEnquiryStatus = async (req, res) => {
-  try {
-    const enquiry = await Enquiry.findByIdAndUpdate(
-      req.params.id,
-      { status: req.body.status },
-      { new: true }
-    );
-    res.json(enquiry);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-export const deleteEnquiry = async (req, res) => {
-  try {
-    await Enquiry.findByIdAndDelete(req.params.id);
-    res.json({ message: "Enquiry deleted" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
   }
 };
