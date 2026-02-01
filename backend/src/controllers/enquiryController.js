@@ -5,13 +5,14 @@ import nodemailer from "nodemailer";
    BREVO SMTP TRANSPORT
 ========================= */
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,        // smtp-relay.brevo.com
-  port: Number(process.env.SMTP_PORT),// 587
-  secure: false,                      // TLS
+  host: process.env.BREVO_SMTP_HOST,
+  port: Number(process.env.BREVO_SMTP_PORT),
+  secure: false, // IMPORTANT for port 587
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
+    user: process.env.BREVO_SMTP_USER,
+    pass: process.env.BREVO_SMTP_PASS,
   },
+  connectionTimeout: 10000, // ⏱ prevent hanging
 });
 
 /* =========================
@@ -22,11 +23,10 @@ export const createEnquiry = async (req, res) => {
     const { productId, name, email, phone, message, enquiryType } = req.body;
 
     if (!name || !email || !phone) {
-      return res.status(400).json({
-        message: "Name, email and phone are required",
-      });
+      return res.status(400).json({ message: "Missing required fields" });
     }
 
+    // 1️⃣ Save enquiry first
     const enquiry = await Enquiry.create({
       user: req.user?.id || null,
       product: productId || null,
@@ -37,37 +37,32 @@ export const createEnquiry = async (req, res) => {
       enquiryType: enquiryType || "contact-form",
     });
 
-    /* =========================
-       SEND EMAIL (BREVO)
-    ========================= */
-    try {
-      await transporter.sendMail({
-        from: `"ARS Electronics" <${process.env.SMTP_USER}>`,
+    // 2️⃣ Respond immediately (VERY IMPORTANT)
+    res.status(201).json({
+      message: "Enquiry submitted successfully",
+      enquiryId: enquiry._id,
+    });
+
+    // 3️⃣ Send email ASYNC (non-blocking)
+    transporter
+      .sendMail({
+        from: `"ARS Electronics" <${process.env.BREVO_SMTP_USER}>`,
         to: process.env.OWNER_EMAIL,
-        replyTo: email,
         subject: `📩 New Enquiry from ${name}`,
         html: `
-          <h2>New Enquiry Received</h2>
-          <p><b>Name:</b> ${name}</p>
-          <p><b>Email:</b> ${email}</p>
-          <p><b>Phone:</b> ${phone}</p>
-          <p><b>Type:</b> ${enquiryType || "Contact Form"}</p>
-          <p><b>Message:</b></p>
-          <p>${message || "-"}</p>
+          <h2>New Enquiry</h2>
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Phone:</strong> ${phone}</p>
+          <p><strong>Message:</strong> ${message || "-"}</p>
           <hr/>
-          <small>Received at ${new Date().toLocaleString()}</small>
+          <small>${new Date().toLocaleString()}</small>
         `,
-      });
-
-      console.log("✅ Brevo email sent");
-    } catch (mailErr) {
-      console.error("❌ Brevo mail failed:", mailErr.message);
-    }
-
-    return res.status(201).json({
-      message: "Enquiry submitted successfully",
-      enquiry,
-    });
+      })
+      .then(() => console.log("✅ Brevo email sent"))
+      .catch((err) =>
+        console.error("⚠️ Brevo email failed:", err.message)
+      );
   } catch (err) {
     console.error("❌ Enquiry error:", err);
     return res.status(500).json({ message: "Server error" });
@@ -75,52 +70,35 @@ export const createEnquiry = async (req, res) => {
 };
 
 /* =========================
-   GET ALL ENQUIRIES
+   ADMIN APIs
 ========================= */
 export const getEnquiries = async (req, res) => {
   try {
-    const enquiries = await Enquiry.find()
-      .populate("product")
-      .populate("user")
-      .sort({ createdAt: -1 });
-
+    const enquiries = await Enquiry.find().sort({ createdAt: -1 });
     res.json(enquiries);
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: err.message });
   }
 };
 
-/* =========================
-   UPDATE STATUS
-========================= */
 export const updateEnquiryStatus = async (req, res) => {
   try {
-    const { status } = req.body;
-
     const enquiry = await Enquiry.findByIdAndUpdate(
       req.params.id,
-      { status },
+      { status: req.body.status },
       { new: true }
     );
-
-    if (!enquiry) {
-      return res.status(404).json({ message: "Enquiry not found" });
-    }
-
-    res.json({ message: "Status updated", enquiry });
+    res.json(enquiry);
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: err.message });
   }
 };
 
-/* =========================
-   DELETE
-========================= */
 export const deleteEnquiry = async (req, res) => {
   try {
     await Enquiry.findByIdAndDelete(req.params.id);
     res.json({ message: "Enquiry deleted" });
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: err.message });
   }
 };
