@@ -16,6 +16,9 @@ router.post("/create", orderController.createOrder);
 // Razorpay verification – public
 router.post("/verify", orderController.verifyPayment);
 
+// Razorpay webhook – public (from Razorpay)
+router.post("/webhook", orderController.handleWebhook);
+
 /**
  * =========================
  * USER ROUTES (AUTH REQUIRED)

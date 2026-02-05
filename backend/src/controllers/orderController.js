@@ -271,4 +271,43 @@ export default {
   getAllOrders,
   updateOrderStatus,
   getOrderById,
+  handleWebhook: async (req, res) => {
+    try {
+      const event = req.body.event;
+      const payload = req.body.payload;
+
+      if (event === "payment.authorized" || event === "order.paid") {
+        const razorpayPaymentId = payload.payment?.id;
+        const razorpayOrderId = payload.order?.id;
+
+        if (razorpayPaymentId && razorpayOrderId) {
+          await Order.findOneAndUpdate(
+            { razorpayOrderId },
+            { 
+              paymentStatus: "success",
+              razorpayPaymentId,
+              orderStatus: "confirmed"
+            }
+          );
+          console.log("✅ Webhook: Payment confirmed for order", razorpayOrderId);
+        }
+      }
+
+      if (event === "payment.failed") {
+        const razorpayOrderId = payload.order?.id;
+        if (razorpayOrderId) {
+          await Order.findOneAndUpdate(
+            { razorpayOrderId },
+            { paymentStatus: "failed" }
+          );
+          console.log("❌ Webhook: Payment failed for order", razorpayOrderId);
+        }
+      }
+
+      return res.status(200).json({ status: "ok" });
+    } catch (error) {
+      console.error("❌ Webhook error:", error);
+      return res.status(500).json({ message: error.message });
+    }
+  }
 };
