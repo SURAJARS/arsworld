@@ -43,4 +43,7 @@ router.get("/:id", auth, orderController.getOrderById);
 // Admin – update order status
 router.put("/:id/status", adminAuth, orderController.updateOrderStatus);
 
+// Admin – delete order
+router.delete("/:id", orderController.deleteOrder);
+
 export default router;

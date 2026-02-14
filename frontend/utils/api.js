@@ -72,6 +72,7 @@ export const orderAPI = {
   getById: (id) => api.get(`/orders/${id}`),
   updateStatus: (id, status) =>
     api.put(`/orders/${id}/status`, { orderStatus: status }),
+  delete: (id) => api.delete(`/orders/${id}`),
 };
 
 /* =====================================================

@@ -96,7 +96,53 @@ export default function AdminDashboard() {
     }
   };
 
-  const deleteProduct = async (productId, productName) => {
+  const deleteOrder = async (orderId, orderNum) => {
+    if (!confirm(`Are you sure you want to delete order #${orderNum}? This action cannot be undone.`)) {
+      return;
+    }
+    try {
+      await orderAPI.delete(orderId);
+      const ordRes = await orderAPI.getAllOrders();
+      const data = ordRes.data || ordRes;
+      const ordersData = (data?.data && Array.isArray(data.data)) ? data.data : (Array.isArray(data) ? data : []);
+      setOrders(ordersData);
+      alert('✅ Order deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting order:', error);
+      alert('Error deleting order: ' + (error.message || 'Unknown error'));
+    }
+  };
+
+  const updateEnquiryStatus = async (enquiryId, newStatus) => {
+    try {
+      await enquiryAPI.updateStatus(enquiryId, newStatus);
+      const enqRes = await enquiryAPI.getAll();
+      const data = enqRes.data || enqRes;
+      const enquiriesData = (data?.data && Array.isArray(data.data)) ? data.data : (Array.isArray(data) ? data : []);
+      setEnquiries(enquiriesData);
+      console.log('✅ Enquiry status updated to:', newStatus);
+    } catch (error) {
+      console.error('Error updating enquiry status:', error);
+      alert('Error updating status: ' + (error.message || 'Unknown error'));
+    }
+  };
+
+  const deleteEnquiry = async (enquiryId, enquiryName) => {
+    if (!confirm(`Are you sure you want to delete enquiry from ${enquiryName}? This action cannot be undone.`)) {
+      return;
+    }
+    try {
+      await enquiryAPI.delete(enquiryId);
+      const enqRes = await enquiryAPI.getAll();
+      const data = enqRes.data || enqRes;
+      const enquiriesData = (data?.data && Array.isArray(data.data)) ? data.data : (Array.isArray(data) ? data : []);
+      setEnquiries(enquiriesData);
+      alert('✅ Enquiry deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting enquiry:', error);
+      alert('Error deleting enquiry: ' + (error.message || 'Unknown error'));
+    }
+  };
     if (!confirm(`Are you sure you want to delete "${productName}"? This action cannot be undone.`)) {
       return;
     }
@@ -274,6 +320,7 @@ export default function AdminDashboard() {
                     <th className="px-4 py-2 text-left">Amount</th>
                     <th className="px-4 py-2 text-left">Status</th>
                     <th className="px-4 py-2 text-left">Payment</th>
+                    <th className="px-4 py-2 text-left">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -291,6 +338,14 @@ export default function AdminDashboard() {
                         <span className={`px-3 py-1 rounded text-sm ${order.paymentStatus === 'success' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
                           {order.paymentStatus}
                         </span>
+                      </td>
+                      <td className="px-4 py-2">
+                        <button
+                          onClick={() => deleteOrder(order._id, order.orderId)}
+                          className="text-red-600 hover:underline font-semibold hover:text-red-800 transition"
+                        >
+                          🗑️ Delete
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -312,19 +367,35 @@ export default function AdminDashboard() {
                     <th className="px-4 py-2 text-left">Phone</th>
                     <th className="px-4 py-2 text-left">Type</th>
                     <th className="px-4 py-2 text-left">Status</th>
+                    <th className="px-4 py-2 text-left">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {enquiries.map((enquiry) => (
                     <tr key={enquiry._id} className="border-t">
                       <td className="px-4 py-2">{enquiry.name}</td>
-                      <td className="px-4 py-2">{enquiry.email}</td>
+                      <td className="px-4 py-2 text-sm">{enquiry.email}</td>
                       <td className="px-4 py-2">{enquiry.phone}</td>
                       <td className="px-4 py-2">{enquiry.enquiryType}</td>
                       <td className="px-4 py-2">
-                        <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded text-sm capitalize">
-                          {enquiry.status}
-                        </span>
+                        <select
+                          value={enquiry.status}
+                          onChange={(e) => updateEnquiryStatus(enquiry._id, e.target.value)}
+                          className="px-3 py-1 rounded text-sm border border-gray-300 capitalize cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="in-progress">In Progress</option>
+                          <option value="completed">Completed</option>
+                          <option value="rejected">Rejected</option>
+                        </select>
+                      </td>
+                      <td className="px-4 py-2">
+                        <button
+                          onClick={() => deleteEnquiry(enquiry._id, enquiry.name)}
+                          className="text-red-600 hover:underline font-semibold hover:text-red-800 transition"
+                        >
+                          🗑️ Delete
+                        </button>
                       </td>
                     </tr>
                   ))}

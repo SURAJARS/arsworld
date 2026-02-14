@@ -264,12 +264,28 @@ const getOrderById = async (req, res) => {
   }
 };
 
+const deleteOrder = async (req, res) => {
+  try {
+    const order = await Order.findByIdAndDelete(req.params.id);
+
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    return res.status(200).json({
+      message: "Order deleted successfully",
+      order,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 export default {
   createOrder,
   verifyPayment,
   getUserOrders,
   getAllOrders,
   updateOrderStatus,
+  deleteOrder,
   getOrderById,
   handleWebhook: async (req, res) => {
     try {

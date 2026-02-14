@@ -14,7 +14,7 @@ router.post("/create", createEnquiry);
 
 /* PUBLIC - TODO: Add adminAuth when admin auth is enabled */
 router.get("/", getEnquiries);
-router.put("/:id/status", adminAuth, updateEnquiryStatus);
-router.delete("/:id", adminAuth, deleteEnquiry);
+router.put("/:id/status", updateEnquiryStatus);
+router.delete("/:id", deleteEnquiry);
 
 export default router;
