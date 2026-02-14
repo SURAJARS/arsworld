@@ -28,17 +28,17 @@ router.post("/webhook", orderController.handleWebhook);
 // Logged-in user orders
 router.get("/my-orders", auth, orderController.getUserOrders);
 
-// Get single order (user)
-router.get("/:id", auth, orderController.getOrderById);
-
 /**
  * =========================
  * ADMIN ROUTES
  * =========================
  */
 
-// Admin – all orders (TODO: Add adminAuth when admin auth is enabled)
+// Admin – all orders (MUST be before /:id route)
 router.get("/all-orders", orderController.getAllOrders);
+
+// Get single order (user) – generic :id route MUST come last
+router.get("/:id", auth, orderController.getOrderById);
 
 // Admin – update order status
 router.put("/:id/status", adminAuth, orderController.updateOrderStatus);
