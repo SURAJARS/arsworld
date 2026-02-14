@@ -36,14 +36,28 @@ export default function AdminDashboard() {
         settingsAPI.get(),
       ]);
 
-      // Handle both response formats: direct array or wrapped in .data
-      const productsData = Array.isArray(prodRes) ? prodRes : (prodRes?.data || []);
-      const ordersData = Array.isArray(ordRes) ? ordRes : (ordRes?.data || []);
-      const enquiriesData = Array.isArray(enqRes) ? enqRes : (enqRes?.data || []);
+      // Extract data from axios response, then unwrap if needed
+      const extractData = (res) => {
+        const data = res.data || res;
+        // If data has a .data property and it's an array, use that (for wrapped responses)
+        if (data?.data && Array.isArray(data.data)) {
+          return data.data;
+        }
+        // If data is an array, use it directly
+        if (Array.isArray(data)) {
+          return data;
+        }
+        // Otherwise return empty array
+        return [];
+      };
+
+      const productsData = extractData(prodRes);
+      const ordersData = extractData(ordRes);
+      const enquiriesData = extractData(enqRes);
       
-      console.log('📦 Loaded products:', productsData);
-      console.log('📦 Products count:', productsData.length);
-      console.log('📦 Raw response:', prodRes);
+      console.log('📦 Loaded products:', productsData.length);
+      console.log('📦 Loaded orders:', ordersData.length);
+      console.log('📦 Loaded enquiries:', enquiriesData.length);
       
       setProducts(productsData);
       setOrders(ordersData);
@@ -72,7 +86,8 @@ export default function AdminDashboard() {
       console.log('✅ Product status updated');
       // Reload products using admin endpoint
       const prodRes = await productAPI.getAllAdmin({});
-      const productsData = Array.isArray(prodRes) ? prodRes : (prodRes?.data || []);
+      const data = prodRes.data || prodRes;
+      const productsData = (data?.data && Array.isArray(data.data)) ? data.data : (Array.isArray(data) ? data : []);
       setProducts(productsData);
       alert(`✅ Product ${!currentStatus ? 'enabled' : 'disabled'} successfully!`);
     } catch (error) {
@@ -92,7 +107,8 @@ export default function AdminDashboard() {
       console.log('✅ Product deleted successfully');
       // Reload products using admin endpoint
       const prodRes = await productAPI.getAllAdmin({});
-      const productsData = Array.isArray(prodRes) ? prodRes : (prodRes?.data || []);
+      const data = prodRes.data || prodRes;
+      const productsData = (data?.data && Array.isArray(data.data)) ? data.data : (Array.isArray(data) ? data : []);
       setProducts(productsData);
       alert(`✅ Product "${productName}" deleted successfully!`);
     } catch (error) {
