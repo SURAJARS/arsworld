@@ -38,6 +38,21 @@ const settingsSchema = new mongoose.Schema(
     googleAnalyticsId: {
       type: String,
     },
+    gstPercentage: {
+      type: Number,
+      default: 18,
+      description: "GST percentage (default 18%)",
+    },
+    shippingCharge: {
+      type: Number,
+      default: 200,
+      description: "Shipping charge in ₹ (default ₹200)",
+    },
+    freeShippingThreshold: {
+      type: Number,
+      default: 5000,
+      description: "Free shipping if cart > this amount in ₹ (default ₹5000)",
+    },
   },
   { timestamps: true }
 );

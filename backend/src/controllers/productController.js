@@ -92,7 +92,7 @@ const getPopularProducts = async (req, res) => {
 
 const createProduct = async (req, res) => {
   try {
-    const { name, description, price, useCases, images, specifications } =
+    const { name, description, price, useCases, images, specifications, gstPercentage } =
       req.body;
 
     if (!name || !description || !price || !images) {
@@ -122,6 +122,7 @@ const createProduct = async (req, res) => {
       useCases: useCases || [],
       images: Array.isArray(images) ? images : [images],
       specifications: specifications || {},
+      gstPercentage: gstPercentage ? parseFloat(gstPercentage) : 18,
     });
 
     return res.status(201).json({
@@ -147,6 +148,7 @@ const updateProduct = async (req, res) => {
       specifications,
       isPopular,
       isEnabled,
+      gstPercentage,
     } = req.body;
 
     const product = await Product.findByIdAndUpdate(
@@ -160,6 +162,7 @@ const updateProduct = async (req, res) => {
         specifications,
         isPopular,
         isEnabled,
+        gstPercentage,
       },
       { new: true }
     );

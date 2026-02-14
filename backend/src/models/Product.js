@@ -56,6 +56,12 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    gstPercentage: {
+      type: Number,
+      default: 18,
+      min: 0,
+      max: 100,
+    },
   },
   { timestamps: true }
 );

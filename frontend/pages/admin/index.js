@@ -10,7 +10,13 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState([]);
   const [enquiries, setEnquiries] = useState([]);
   const [settings, setSettings] = useState(null);
-  const [settingsForm, setSettingsForm] = useState({ festivalBannerEnabled: false, festivalBannerText: { en: '', ta: '' } });
+  const [settingsForm, setSettingsForm] = useState({ 
+    festivalBannerEnabled: false, 
+    festivalBannerText: { en: '', ta: '' },
+    gstPercentage: 18,
+    shippingCharge: 200,
+    freeShippingThreshold: 5000,
+  });
   const [settingsSaving, setSettingsSaving] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -69,7 +75,10 @@ export default function AdminDashboard() {
       if (settingsData) {
         setSettingsForm({
           festivalBannerEnabled: settingsData.festivalBannerEnabled || false,
-          festivalBannerText: settingsData.festivalBannerText || { en: '', ta: '' }
+          festivalBannerText: settingsData.festivalBannerText || { en: '', ta: '' },
+          gstPercentage: settingsData.gstPercentage || 18,
+          shippingCharge: settingsData.shippingCharge || 200,
+          freeShippingThreshold: settingsData.freeShippingThreshold || 5000,
         });
       }
     } catch (error) {
@@ -440,6 +449,53 @@ export default function AdminDashboard() {
                   placeholder="Enter festival greeting in Tamil"
                 />
               </div>
+
+              <hr className="my-4" />
+              <h3 className="text-lg font-semibold mb-4">💰 Pricing Configuration</h3>
+
+              <div>
+                <label className="block font-semibold mb-2">GST Percentage (%)</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  value={settingsForm.gstPercentage || 18}
+                  onChange={(e) => handleSettingsChange('gstPercentage', parseFloat(e.target.value))}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
+                  placeholder="Enter GST percentage"
+                />
+                <small className="text-gray-500">Applied to all orders. Current: {settingsForm.gstPercentage || 18}%</small>
+              </div>
+
+              <div>
+                <label className="block font-semibold mb-2">Shipping Charge (₹)</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={settingsForm.shippingCharge || 200}
+                  onChange={(e) => handleSettingsChange('shippingCharge', parseFloat(e.target.value))}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
+                  placeholder="Enter shipping charge in rupees"
+                />
+                <small className="text-gray-500">Charged when cart is below threshold. Current: ₹{settingsForm.shippingCharge || 200}</small>
+              </div>
+
+              <div>
+                <label className="block font-semibold mb-2">Free Shipping If Cart > (₹)</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={settingsForm.freeShippingThreshold || 5000}
+                  onChange={(e) => handleSettingsChange('freeShippingThreshold', parseFloat(e.target.value))}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
+                  placeholder="Enter free shipping threshold in rupees"
+                />
+                <small className="text-gray-500">Cart value above this gets free shipping. Current: ₹{settingsForm.freeShippingThreshold || 5000}</small>
+              </div>
+
               <button 
                 onClick={saveSettings}
                 disabled={settingsSaving}

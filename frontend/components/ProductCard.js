@@ -67,9 +67,13 @@ export default function ProductCard({ product }) {
         </p>
 
         <div className="flex justify-between items-center mb-4">
-          <span className="text-2xl font-bold text-secondary">
-            ₹{product.price.toLocaleString('en-IN')}
-          </span>
+          <div>
+            <p className="text-sm text-gray-600">Price (Inc. GST)</p>
+            <span className="text-2xl font-bold text-secondary">
+              ₹{(product.price * (1 + (product.gstPercentage || 18) / 100)).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+            </span>
+            <p className="text-xs text-gray-500 mt-1">({(product.gstPercentage || 18)}% GST)</p>
+          </div>
         </div>
 
         <div className="space-y-2">
