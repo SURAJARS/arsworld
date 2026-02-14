@@ -42,8 +42,8 @@ export default function Products({ initialProducts }) {
 
   const useCases = [
     { value: '', label: 'All' },
-    { value: 'small_families', label: 'Small Families' },
-    { value: 'large_families', label: 'Large Families' },
+    { value: 'small_families', label: 'Small Appliances' },
+    { value: 'large_families', label: 'Large Appliances' },
     { value: 'energy_saving', label: 'Energy Saving' },
     { value: 'premium', label: 'Premium' },
   ];

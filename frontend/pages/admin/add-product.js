@@ -92,8 +92,8 @@ export default function AddProduct() {
   };
 
   const useCaseOptions = [
-    { value: 'small_families', label: 'Small Families' },
-    { value: 'large_families', label: 'Large Families' },
+    { value: 'small_families', label: 'Small Appliances' },
+    { value: 'large_families', label: 'Large Appliances' },
     { value: 'energy_saving', label: 'Energy Saving' },
     { value: 'premium', label: 'Premium' },
     { value: 'popular', label: 'Popular' },

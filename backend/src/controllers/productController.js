@@ -42,7 +42,7 @@ const getAllProductsAdmin = async (req, res) => {
     }
 
     const products = await Product.find(query).sort({ createdAt: -1 });
-    return res.status(200).json(products);
+    return res.status(200).json({ data: products });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }

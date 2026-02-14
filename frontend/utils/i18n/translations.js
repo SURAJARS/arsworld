@@ -12,8 +12,8 @@ export const en = {
   home: {
     welcome: 'Welcome to ARS Electronics World',
     serving: 'Serving customers in and around Krishnagiri for many years',
-    smallFamilies: 'For Small Families',
-    largeFamilies: 'For Large Families',
+    smallFamilies: 'For Small Appliances',
+    largeFamilies: 'For Large Appliances',
     energySaving: 'Energy Saving Appliances',
     premium: 'Premium Home Appliances',
     popular: 'Popular in Our Shop',
