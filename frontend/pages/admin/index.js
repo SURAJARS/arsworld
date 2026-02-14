@@ -37,11 +37,13 @@ export default function AdminDashboard() {
       ]);
 
       // Handle both response formats: direct array or wrapped in .data
-      const productsData = Array.isArray(prodRes) ? prodRes : (prodRes.data || []);
-      const ordersData = Array.isArray(ordRes) ? ordRes : (ordRes.data || []);
-      const enquiriesData = Array.isArray(enqRes) ? enqRes : (enqRes.data || []);
+      const productsData = Array.isArray(prodRes) ? prodRes : (prodRes?.data || []);
+      const ordersData = Array.isArray(ordRes) ? ordRes : (ordRes?.data || []);
+      const enquiriesData = Array.isArray(enqRes) ? enqRes : (enqRes?.data || []);
       
-      console.log('📦 Loaded products:', productsData.length);
+      console.log('📦 Loaded products:', productsData);
+      console.log('📦 Products count:', productsData.length);
+      console.log('📦 Raw response:', prodRes);
       
       setProducts(productsData);
       setOrders(ordersData);
@@ -70,7 +72,8 @@ export default function AdminDashboard() {
       console.log('✅ Product status updated');
       // Reload products using admin endpoint
       const prodRes = await productAPI.getAllAdmin({});
-      setProducts(prodRes.data || []);
+      const productsData = Array.isArray(prodRes) ? prodRes : (prodRes?.data || []);
+      setProducts(productsData);
       alert(`✅ Product ${!currentStatus ? 'enabled' : 'disabled'} successfully!`);
     } catch (error) {
       console.error('❌ Error toggling product status:', error);
@@ -89,7 +92,8 @@ export default function AdminDashboard() {
       console.log('✅ Product deleted successfully');
       // Reload products using admin endpoint
       const prodRes = await productAPI.getAllAdmin({});
-      setProducts(prodRes.data || []);
+      const productsData = Array.isArray(prodRes) ? prodRes : (prodRes?.data || []);
+      setProducts(productsData);
       alert(`✅ Product "${productName}" deleted successfully!`);
     } catch (error) {
       console.error('❌ Error deleting product:', error);
