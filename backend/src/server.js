@@ -73,7 +73,7 @@ app.use("/api/settings", settingsRoutes);
 app.use("/api/catalogues", catalogueRoutes);
 
 app.get("/api/health", (req, res) => {
-  res.json({ message: "Server is running" });
+  res.json({ message: "Server is running - v2.0" });
 });
 
 /* =========================
