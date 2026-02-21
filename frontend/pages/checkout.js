@@ -2,6 +2,7 @@ import Head from "next/head";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { useCart } from "../utils/CartContext";
+import { useAuth } from "../utils/AuthContext";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -9,6 +10,7 @@ import { orderAPI, settingsAPI } from "../utils/api";
 
 export default function Checkout() {
   const router = useRouter();
+  const { user, isLoading, isAuthenticated } = useAuth();
   const { cart, removeFromCart, updateQuantity, getCartTotal, clearCart } =
     useCart();
 
@@ -26,6 +28,25 @@ export default function Checkout() {
     city: "",
     postalCode: "",
   });
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push(`/login?redirect=/checkout`);
+    }
+  }, [isLoading, isAuthenticated, router]);
+
+  // Pre-fill form with user data if logged in
+  useEffect(() => {
+    if (user && isAuthenticated) {
+      setFormData((prev) => ({
+        ...prev,
+        name: user.name || "",
+        email: user.email || "",
+        phone: user.phone || "",
+      }));
+    }
+  }, [user, isAuthenticated]);
 
   // Fetch settings on component mount
   useEffect(() => {
@@ -171,6 +192,21 @@ export default function Checkout() {
   /* =========================
      EMPTY CART
   ========================= */
+  if (isLoading) {
+    return (
+      <>
+        <Head>
+          <title>Checkout - ARS Electronics World</title>
+        </Head>
+        <Header />
+        <main className="max-w-7xl mx-auto px-4 py-12 text-center">
+          <h1 className="text-4xl font-bold mb-6">Loading...</h1>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
   if (cart.length === 0 && !loading) {
     return (
       <>
@@ -204,6 +240,27 @@ export default function Checkout() {
 
       <main className="max-w-7xl mx-auto px-4 py-12">
         <h1 className="text-4xl font-bold text-center mb-10">🛒 Checkout</h1>
+
+        {/* USER INFO */}
+        {user && isAuthenticated && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-lg font-semibold text-blue-900">
+                  👤 Logged in as: <span className="text-blue-600">{user.name}</span>
+                </p>
+                <p className="text-sm text-blue-700 mt-1">
+                  📧 {user.email}
+                </p>
+              </div>
+              <div className="space-x-3">
+                <Link href="/dashboard" className="text-blue-600 hover:text-blue-800 font-semibold underline">
+                  📋 View Orders
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* CART ITEMS */}
         <div className="bg-white shadow rounded-lg p-6 mb-8">

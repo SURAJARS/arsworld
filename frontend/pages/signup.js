@@ -5,11 +5,13 @@ import Footer from '../components/Footer';
 import { authAPI } from '../utils/api';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import { useAuth } from '../utils/AuthContext';
 import Link from 'next/link';
 
 export default function Signup() {
   const { t } = useI18n();
   const router = useRouter();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -33,8 +35,7 @@ export default function Signup() {
 
     try {
       const res = await authAPI.register(formData);
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('user', JSON.stringify(res.data.user));
+      login(res.data.token, res.data.user);
       router.push('/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Sign up failed');

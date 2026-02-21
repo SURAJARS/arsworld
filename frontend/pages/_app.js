@@ -1,5 +1,6 @@
 import { I18nProvider } from '../utils/i18n/context';
 import { CartProvider } from '../utils/CartContext';
+import { AuthProvider } from '../utils/AuthContext';
 import { GoogleAnalytics } from '../utils/analytics';
 import { useEffect, useState } from 'react';
 import { settingsAPI } from '../utils/api';
@@ -24,12 +25,14 @@ function MyApp({ Component, pageProps }) {
   }, []);
 
   return (
-    <CartProvider>
-      <I18nProvider>
-        <GoogleAnalytics measurementId={measurementId} />
-        <Component {...pageProps} />
-      </I18nProvider>
-    </CartProvider>
+    <AuthProvider>
+      <CartProvider>
+        <I18nProvider>
+          <GoogleAnalytics measurementId={measurementId} />
+          <Component {...pageProps} />
+        </I18nProvider>
+      </CartProvider>
+    </AuthProvider>
   );
 }
 

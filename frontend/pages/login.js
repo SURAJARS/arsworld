@@ -5,11 +5,13 @@ import Footer from '../components/Footer';
 import { authAPI } from '../utils/api';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import { useAuth } from '../utils/AuthContext';
 import Link from 'next/link';
 
 export default function Login() {
   const { t } = useI18n();
   const router = useRouter();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,9 +30,8 @@ export default function Login() {
 
     try {
       const res = await authAPI.login(formData);
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('user', JSON.stringify(res.data.user));
-      router.push('/dashboard');
+      login(res.data.token, res.data.user);
+      router.push(router.query.redirect || '/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
     } finally {
