@@ -14,9 +14,12 @@ export default function Header() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const cartCount = getCartItemsCount();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     logout();
-    router.push('/');
+    // Wait for state update then navigate
+    setTimeout(() => {
+      router.push('/');
+    }, 100);
   };
 
   return (

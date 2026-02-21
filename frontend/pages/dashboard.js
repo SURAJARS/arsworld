@@ -25,10 +25,10 @@ export default function Dashboard() {
       return;
     }
 
-    if (isAuthenticated) {
+    if (isAuthenticated && user) {
       loadUserData();
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading, user, router]);
 
   const loadUserData = async () => {
     try {
@@ -60,12 +60,15 @@ export default function Dashboard() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     logout();
-    router.push('/');
+    // Wait for state update then navigate
+    setTimeout(() => {
+      router.push('/');
+    }, 100);
   };
 
-  if (isLoading || loading) {
+  if (isLoading || loading || !user || !isAuthenticated) {
     return (
       <>
         <Header />
