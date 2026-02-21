@@ -152,6 +152,8 @@ export default function AdminDashboard() {
       alert('Error deleting enquiry: ' + (error.message || 'Unknown error'));
     }
   };
+
+  const deleteProduct = async (productId, productName) => {
     if (!confirm(`Are you sure you want to delete "${productName}"? This action cannot be undone.`)) {
       return;
     }
@@ -184,6 +186,8 @@ export default function AdminDashboard() {
           [lang]: value
         }
       });
+    } else if (field === 'gstPercentage' || field === 'shippingCharge' || field === 'freeShippingThreshold') {
+      setSettingsForm({ ...settingsForm, [field]: value });
     }
   };
 
@@ -483,7 +487,7 @@ export default function AdminDashboard() {
               </div>
 
               <div>
-                <label className="block font-semibold mb-2">Free Shipping If Cart > (₹)</label>
+                <label className="block font-semibold mb-2">Free Shipping If Cart Above (₹)</label>
                 <input
                   type="number"
                   min="0"
@@ -506,6 +510,7 @@ export default function AdminDashboard() {
             </div>
           </div>
         )}
+
       </main>
 
       <Footer />
