@@ -1,4 +1,5 @@
 import { useI18n } from '../utils/i18n/context';
+import { useAuth } from '../utils/AuthContext';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
@@ -8,14 +9,13 @@ import { useCart } from '../utils/CartContext';
 export default function Header() {
   const { t, language, toggleLanguage } = useI18n();
   const router = useRouter();
+  const { isAuthenticated, user, logout } = useAuth();
   const { getCartItemsCount } = useCart();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const cartCount = getCartItemsCount();
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    setIsLoggedIn(false);
+    logout();
     router.push('/');
   };
 
@@ -50,7 +50,7 @@ export default function Header() {
 
         <div className="flex items-center gap-4">
           <Link
-            href="/checkout"
+            href="/cart"
             className="relative px-3 py-2 bg-yellow-400 text-gray-900 rounded font-semibold hover:bg-yellow-500 transition flex items-center gap-2"
           >
             🛒 Cart
@@ -68,16 +68,19 @@ export default function Header() {
             {language === 'en' ? 'தமிழ்' : 'EN'}
           </button>
 
-          {isLoggedIn ? (
+          {isAuthenticated ? (
             <>
-              <Link href="/dashboard" className="text-gray-700 hover:text-yellow-600 font-medium">{t('header.dashboard')}</Link>
-              <button onClick={handleLogout} className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 font-semibold">
-                {t('header.logout')}
+              <div className="hidden sm:flex items-center gap-2 px-3 py-2 bg-blue-100 rounded text-sm">
+                <span className="text-blue-700 font-semibold">👤 {user?.name}</span>
+              </div>
+              <Link href="/dashboard" className="hidden sm:inline text-gray-700 hover:text-yellow-600 font-medium">{t('header.dashboard')}</Link>
+              <button onClick={handleLogout} className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 font-semibold transition">
+                🚪 {t('header.logout')}
               </button>
             </>
           ) : (
             <Link href="/login" className="px-3 py-2 bg-yellow-400 text-gray-900 rounded hover:bg-yellow-500 font-semibold transition">
-              {t('header.login')}
+              🔑 {t('header.login')}
             </Link>
           )}
 

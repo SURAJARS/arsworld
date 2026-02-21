@@ -1,1 +1,1 @@
-{"version":1,"functions":{"/":{},"/products/[id]":{},"/products":{},"/contact":{}}}
+{"version":1,"functions":{"/contact":{},"/products":{},"/products/[id]":{},"/":{}}}
