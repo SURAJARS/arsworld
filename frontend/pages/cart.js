@@ -11,9 +11,17 @@ export default function Cart() {
   const { cart, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
   const { isAuthenticated, isLoading } = useAuth();
 
-  const subtotal = getCartTotal();
+  // Calculate totals correctly using BASE price (without GST)
+  const subtotal = cart.reduce((total, item) => {
+    const basePrice = item.basePrice || item.price;
+    return total + basePrice * item.quantity;
+  }, 0);
+
+  // Tax is calculated FROM the base price
   const tax = cart.reduce((total, item) => {
-    const itemTax = (item.price * item.quantity * (item.gstPercentage || 18)) / 100;
+    const basePrice = item.basePrice || item.price;
+    const gstPercentage = item.gstPercentage || 18;
+    const itemTax = (basePrice * item.quantity * gstPercentage) / 100;
     return total + itemTax;
   }, 0);
   const shipping = 0; // Will be calculated on checkout
@@ -121,12 +129,13 @@ export default function Cart() {
                       <div className="text-right flex flex-col justify-between">
                         <div>
                           <p className="text-sm text-gray-600">Base Price</p>
-                          <p className="font-bold text-lg">₹{item.price.toLocaleString('en-IN')}</p>
+                          <p className="font-bold text-lg">₹{(item.basePrice || item.price).toLocaleString('en-IN')}</p>
+                          <p className="text-xs text-gray-500">+{item.gstPercentage || 18}% GST</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm text-gray-600">Subtotal</p>
+                          <p className="text-sm text-gray-600">Subtotal (inc. GST)</p>
                           <p className="font-bold text-lg text-blue-600">
-                            ₹{(item.price * item.quantity).toLocaleString('en-IN')}
+                            ₹{((item.basePrice || item.price) * (1 + (item.gstPercentage || 18) / 100) * item.quantity).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                           </p>
                         </div>
                       </div>
@@ -158,12 +167,12 @@ export default function Cart() {
 
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between text-gray-700">
-                    <span>Subtotal</span>
+                    <span>Subtotal (Base)</span>
                     <span>₹{subtotal.toLocaleString('en-IN')}</span>
                   </div>
 
                   <div className="flex justify-between text-gray-700">
-                    <span>Estimated Tax (avg 18%)</span>
+                    <span>GST (Per Product)</span>
                     <span>₹{tax.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
                   </div>
 

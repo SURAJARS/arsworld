@@ -29,6 +29,15 @@ export function CartProvider({ children }) {
   const addToCart = (product, quantity = 1) => {
     setCart((prevCart) => {
       const existingItem = prevCart.find((item) => item._id === product._id);
+      // Store base price (without GST) and GST percentage separately
+      const basePrice = product.price;
+      const gstPercentage = product.gstPercentage || 18;
+      const cartItem = {
+        ...product,
+        basePrice,
+        gstPercentage,
+        quantity,
+      };
       if (existingItem) {
         return prevCart.map((item) =>
           item._id === product._id
@@ -36,7 +45,7 @@ export function CartProvider({ children }) {
             : item
         );
       }
-      return [...prevCart, { ...product, quantity }];
+      return [...prevCart, cartItem];
     });
   };
 
@@ -61,7 +70,8 @@ export function CartProvider({ children }) {
   };
 
   const getCartTotal = () => {
-    return cart.reduce((total, item) => total + item.price * item.quantity, 0);
+    // Returns base price total (without GST)
+    return cart.reduce((total, item) => total + (item.basePrice || item.price) * item.quantity, 0);
   };
 
   const getCartItemsCount = () => {

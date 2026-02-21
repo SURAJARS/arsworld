@@ -76,20 +76,27 @@ export default function Checkout() {
   /* =========================
      PRICE CALCULATION - PER-PRODUCT GST
   ========================= */
-  const subtotal = getCartTotal();
+  const subtotal = (() => {
+    // Subtotal = BASE price (without GST)
+    return cart.reduce((total, item) => {
+      const basePrice = item.basePrice || item.price;
+      return total + basePrice * item.quantity;
+    }, 0);
+  })();
   
   // Calculate GST per product based on its specific GST rate
   let tax = 0;
   let taxBreakdown = [];
   cart.forEach((item) => {
-    const productSubtotal = item.price * item.quantity;
+    const basePrice = item.basePrice || item.price;
+    const productSubtotal = basePrice * item.quantity;
     const productGst = item.gstPercentage || 18;
-    const productTax = productSubtotal * (productGst / 100);
+    const productTax = (productSubtotal * productGst) / 100;
     tax += productTax;
     taxBreakdown.push({
       name: item.name?.en || item.name,
       quantity: item.quantity,
-      basePrice: item.price,
+      basePrice: basePrice,
       gstRate: productGst,
       tax: productTax,
     });
@@ -321,7 +328,7 @@ export default function Checkout() {
 
           <div className="space-y-2">
             <div className="flex justify-between">
-              <span>Subtotal</span>
+              <span>Subtotal (Base Price)</span>
               <span>₹{subtotal.toLocaleString("en-IN")}</span>
             </div>
             
