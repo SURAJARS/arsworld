@@ -24,7 +24,12 @@ export default function EditProduct() {
       console.log('📝 Loading product:', id);
       const res = await productAPI.getById(id);
       console.log('✅ Product loaded:', res.data);
-      setFormData(res.data);
+      // Ensure gstPercentage is included (default to 18 if missing)
+      const productData = {
+        ...res.data,
+        gstPercentage: res.data.gstPercentage || 18
+      };
+      setFormData(productData);
     } catch (err) {
       console.error('❌ Error loading product:', err);
       setError('Failed to load product');
