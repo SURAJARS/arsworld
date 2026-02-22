@@ -4,7 +4,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ProductCard from '../components/ProductCard';
 import { productAPI } from '../utils/api';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 
 export default function Products({ initialProducts }) {
@@ -39,6 +39,13 @@ export default function Products({ initialProducts }) {
     }
     setLoading(false);
   };
+
+  // Apply useCase filter from query parameter on page load
+  useEffect(() => {
+    if (router.query.useCase) {
+      handleFilter(router.query.useCase);
+    }
+  }, [router.query.useCase]);
 
   const useCases = [
     { value: '', label: 'All' },

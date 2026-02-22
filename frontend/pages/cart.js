@@ -11,17 +11,18 @@ export default function Cart() {
   const { cart, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
   const { isAuthenticated, isLoading } = useAuth();
 
-  // Calculate totals correctly using BASE price (without GST)
+  // Calculate totals correctly using extracted BASE price
   const subtotal = cart.reduce((total, item) => {
-    const basePrice = item.basePrice || item.price;
-    return total + basePrice * item.quantity;
+    // item.price is FINAL/INCLUSIVE, basePrice is extracted
+    const base = item.basePrice || (item.price / (1 + (item.gstPercentage || 18) / 100));
+    return total + base * item.quantity;
   }, 0);
 
-  // Tax is calculated FROM the base price
+  // Tax calculated from extracted base price
   const tax = cart.reduce((total, item) => {
-    const basePrice = item.basePrice || item.price;
+    const base = item.basePrice || (item.price / (1 + (item.gstPercentage || 18) / 100));
     const gstPercentage = item.gstPercentage || 18;
-    const itemTax = (basePrice * item.quantity * gstPercentage) / 100;
+    const itemTax = (base * item.quantity * gstPercentage) / 100;
     return total + itemTax;
   }, 0);
   const shipping = 0; // Will be calculated on checkout
@@ -73,9 +74,9 @@ export default function Cart() {
 
                 <div className="space-y-4">
                   {cart.map((item) => (
-                    <div key={item._id} className="flex gap-4 border rounded-lg p-4 hover:shadow-md transition">
+                    <div key={item._id} className="grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 border rounded-lg p-3 sm:p-4 hover:shadow-md transition">
                       {/* Product Image */}
-                      <div className="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                      <div className="sm:col-span-2 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 h-24 sm:h-full">
                         {item.images && item.images[0] ? (
                           <img
                             src={item.images[0]}
@@ -90,27 +91,27 @@ export default function Cart() {
                       </div>
 
                       {/* Product Details */}
-                      <div className="flex-1">
-                        <h3 className="font-bold text-lg mb-1">{item.name?.en || item.name}</h3>
-                        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                      <div className="sm:col-span-5">
+                        <h3 className="font-bold text-base sm:text-lg mb-1">{item.name?.en || item.name}</h3>
+                        <p className="text-gray-600 text-xs sm:text-sm mb-2 sm:mb-3 line-clamp-2">
                           {item.description?.en || item.description}
                         </p>
 
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-semibold">Qty:</span>
+                        <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3">
+                          <div className="flex items-center gap-1 sm:gap-2">
+                            <span className="text-xs sm:text-sm font-semibold">Qty:</span>
                             <button
                               onClick={() => updateQuantity(item._id, item.quantity - 1)}
-                              className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                              className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm"
                             >
                               −
                             </button>
-                            <span className="px-3 py-1 bg-gray-100 rounded w-12 text-center">
+                            <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-gray-100 rounded w-8 sm:w-12 text-center text-sm">
                               {item.quantity}
                             </span>
                             <button
                               onClick={() => updateQuantity(item._id, item.quantity + 1)}
-                              className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                              className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm"
                             >
                               +
                             </button>
@@ -118,25 +119,26 @@ export default function Cart() {
 
                           <button
                             onClick={() => removeFromCart(item._id)}
-                            className="text-red-600 hover:text-red-800 font-semibold text-sm"
+                            className="text-red-600 hover:text-red-800 font-semibold text-xs sm:text-sm"
                           >
-                            🗑️ Remove
+                            🗑️
                           </button>
                         </div>
                       </div>
 
                       {/* Price */}
-                      <div className="text-right flex flex-col justify-between">
-                        <div>
-                          <p className="text-sm text-gray-600">Base Price</p>
-                          <p className="font-bold text-lg">₹{(item.basePrice || item.price).toLocaleString('en-IN')}</p>
+                      <div className="sm:col-span-5 text-right grid grid-cols-2 sm:grid-cols-1 gap-2 sm:gap-0 sm:flex sm:flex-col sm:justify-between">
+                        <div className="col-span-1">
+                          <p className="text-xs text-gray-600">Base Price</p>
+                          <p className="text-sm sm:text-lg font-bold">₹{(item.basePrice || item.price / (1 + (item.gstPercentage || 18) / 100)).toLocaleString('en-IN', { maximumFractionDigits: 2 })}</p>
                           <p className="text-xs text-gray-500">+{item.gstPercentage || 18}% GST</p>
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm text-gray-600">Subtotal (inc. GST)</p>
-                          <p className="font-bold text-lg text-blue-600">
-                            ₹{((item.basePrice || item.price) * (1 + (item.gstPercentage || 18) / 100) * item.quantity).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                        <div className="col-span-1 text-right">
+                          <p className="text-xs text-gray-600">Subtotal (Final)</p>
+                          <p className="text-sm sm:text-lg font-bold text-blue-600">
+                            ₹{(item.price * item.quantity).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                           </p>
+                          <p className="text-xs text-green-600">Qty: {item.quantity}</p>
                         </div>
                       </div>
                     </div>
@@ -162,41 +164,41 @@ export default function Cart() {
 
             {/* PRICE SUMMARY */}
             <div className="lg:col-span-1">
-              <div className="bg-gradient-to-b from-blue-50 to-blue-100 rounded-lg shadow-lg p-6 sticky top-24">
-                <h2 className="text-2xl font-bold mb-6 text-center border-b pb-4">💰 Summary</h2>
+              <div className="bg-gradient-to-b from-blue-50 to-blue-100 rounded-lg shadow-lg p-4 sm:p-6 sticky top-20 sm:top-24">
+                <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-center border-b pb-3 sm:pb-4">💰 Summary</h2>
 
-                <div className="space-y-3 mb-6">
-                  <div className="flex justify-between text-gray-700">
+                <div className="space-y-2 sm:space-y-3 mb-6">
+                  <div className="flex justify-between text-sm sm:text-base text-gray-700">
                     <span>Subtotal (Base)</span>
-                    <span>₹{subtotal.toLocaleString('en-IN')}</span>
+                    <span className="font-semibold">₹{subtotal.toLocaleString('en-IN')}</span>
                   </div>
 
-                  <div className="flex justify-between text-gray-700">
+                  <div className="flex justify-between text-sm sm:text-base text-gray-700">
                     <span>GST (Per Product)</span>
-                    <span>₹{tax.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                    <span className="font-semibold">₹{tax.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
                   </div>
 
-                  <div className="flex justify-between text-gray-700">
+                  <div className="flex justify-between text-sm sm:text-base text-gray-700">
                     <span>Shipping</span>
-                    <span className="text-green-600 font-semibold">Calculated at checkout</span>
+                    <span className="text-green-600 font-semibold text-xs sm:text-sm">Calculated at checkout</span>
                   </div>
 
                   <hr className="my-3" />
 
-                  <div className="flex justify-between text-xl font-bold text-blue-900">
+                  <div className="flex justify-between text-lg sm:text-xl font-bold text-blue-900">
                     <span>Estimated Total</span>
                     <span>≈ ₹{(subtotal + tax).toLocaleString('en-IN')}</span>
                   </div>
                 </div>
 
                 {!isAuthenticated ? (
-                  <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4 mb-4">
-                    <p className="text-sm text-yellow-700 font-semibold mb-3">
+                  <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 sm:p-4 mb-4">
+                    <p className="text-xs sm:text-sm text-yellow-700 font-semibold mb-3">
                       🔐 Login required to complete order
                     </p>
                     <Link
                       href="/login?redirect=/checkout"
-                      className="block w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-bold text-center hover:bg-blue-700 transition"
+                      className="block w-full px-3 sm:px-4 py-2 sm:py-3 bg-blue-600 text-white rounded-lg font-bold text-sm sm:text-base text-center hover:bg-blue-700 transition"
                     >
                       🔑 Login to Checkout
                     </Link>
@@ -204,18 +206,11 @@ export default function Cart() {
                 ) : (
                   <button
                     onClick={handlePlaceOrder}
-                    className="w-full px-4 py-3 bg-green-600 text-white rounded-lg font-bold text-lg hover:bg-green-700 transition mb-3"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-green-600 text-white rounded-lg font-bold text-sm sm:text-lg hover:bg-green-700 transition"
                   >
                     ✅ Place Order
                   </button>
                 )}
-
-                <button
-                  onClick={handlePlaceOrder}
-                  className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition"
-                >
-                  Continue as {isAuthenticated ? 'Logged In User' : 'Guest'}
-                </button>
 
                 <div className="mt-4 text-center">
                   <p className="text-xs text-gray-600">

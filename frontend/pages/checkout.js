@@ -74,12 +74,13 @@ export default function Checkout() {
   };
 
   /* =========================
-     PRICE CALCULATION - PER-PRODUCT GST
+     PRICE CALCULATION - PER-PRODUCT GST (FIXED)
   ========================= */
   const subtotal = (() => {
     // Subtotal = BASE price (without GST)
     return cart.reduce((total, item) => {
-      const basePrice = item.basePrice || item.price;
+      // item.price is FINAL/INCLUSIVE, extract base price
+      const basePrice = item.basePrice || (item.price / (1 + (item.gstPercentage || 18) / 100));
       return total + basePrice * item.quantity;
     }, 0);
   })();
@@ -88,7 +89,8 @@ export default function Checkout() {
   let tax = 0;
   let taxBreakdown = [];
   cart.forEach((item) => {
-    const basePrice = item.basePrice || item.price;
+    // item.price is FINAL/INCLUSIVE, extract base price
+    const basePrice = item.basePrice || (item.price / (1 + (item.gstPercentage || 18) / 100));
     const productSubtotal = basePrice * item.quantity;
     const productGst = item.gstPercentage || 18;
     const productTax = (productSubtotal * productGst) / 100;
@@ -96,9 +98,9 @@ export default function Checkout() {
     taxBreakdown.push({
       name: item.name?.en || item.name,
       quantity: item.quantity,
-      basePrice: basePrice,
+      basePrice: parseFloat(basePrice.toFixed(2)),
       gstRate: productGst,
-      tax: productTax,
+      tax: parseFloat(productTax.toFixed(2)),
     });
   });
   

@@ -29,12 +29,18 @@ export function CartProvider({ children }) {
   const addToCart = (product, quantity = 1) => {
     setCart((prevCart) => {
       const existingItem = prevCart.find((item) => item._id === product._id);
-      // Store base price (without GST) and GST percentage separately
-      const basePrice = product.price;
+      // Price from product is INCLUSIVE of GST (final price customer sees)
+      const finalPrice = product.price; // This is inclusive of GST
       const gstPercentage = product.gstPercentage || 18;
+      
+      // Extract base price from final inclusive price
+      // Formula: basePrice = finalPrice / (1 + gstPercentage/100)
+      const basePrice = finalPrice / (1 + gstPercentage / 100);
+      
       const cartItem = {
         ...product,
-        basePrice,
+        price: finalPrice, // Keep original final price
+        basePrice: parseFloat(basePrice.toFixed(2)), // Extract base price with 2 decimals
         gstPercentage,
         quantity,
       };
