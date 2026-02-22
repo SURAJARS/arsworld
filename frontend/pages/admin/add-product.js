@@ -175,6 +175,7 @@ export default function AddProduct() {
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
                 required
               />
+              <small className="text-gray-500 mt-1 block">Final price (inclusive of GST)</small>
             </div>
             <div>
               <label className="block font-semibold mb-2">GST Percentage (%)</label>
@@ -192,6 +193,54 @@ export default function AddProduct() {
               <small className="text-gray-500 mt-1 block">Common rates: 5%, 12%, 18%, 28%</small>
             </div>
           </div>
+
+          {/* GST Breakdown Calculator */}
+          {formData.price && formData.gstPercentage ? (
+            <div className="bg-blue-50 border-2 border-blue-200 p-6 rounded-lg">
+              <h3 className="font-bold text-lg mb-4 text-blue-900">📊 GST Breakdown</h3>
+              {(() => {
+                const finalPrice = parseFloat(formData.price);
+                const gstRate = parseFloat(formData.gstPercentage);
+                const basePrice = finalPrice / (1 + gstRate / 100);
+                const gstAmount = finalPrice - basePrice;
+                const verification = basePrice + gstAmount;
+                
+                return (
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between p-2 bg-white rounded">
+                      <span>💰 Final Price (you entered):</span>
+                      <span className="font-bold">₹{finalPrice.toLocaleString('en-IN')}</span>
+                    </div>
+                    <div className="flex justify-between p-2 bg-white rounded">
+                      <span>📈 GST Rate:</span>
+                      <span className="font-bold">{gstRate}%</span>
+                    </div>
+                    <div className="border-t-2 border-blue-300 pt-3 mt-3">
+                      <div className="flex justify-between p-2 bg-green-50 rounded mb-2">
+                        <span>🔢 Base Price (after removing GST):</span>
+                        <span className="font-bold text-green-700">₹{basePrice.toLocaleString('en-IN', {maximumFractionDigits: 2})}</span>
+                      </div>
+                      <div className="flex justify-between p-2 bg-yellow-50 rounded mb-2">
+                        <span>📊 GST Amount ({gstRate}%):</span>
+                        <span className="font-bold text-yellow-700">₹{gstAmount.toLocaleString('en-IN', {maximumFractionDigits: 2})}</span>
+                      </div>
+                      <div className="flex justify-between p-2 bg-purple-50 rounded border-2 border-purple-300">
+                        <span>✅ Verification (Base + GST):</span>
+                        <span className="font-bold text-purple-700">₹{verification.toLocaleString('en-IN', {maximumFractionDigits: 0})}</span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-3">
+                      ✓ This shows how the price breaks down when customers buy. The final total will never exceed what you entered.
+                    </p>
+                  </div>
+                );
+              })()}
+            </div>
+          ) : (
+            <div className="bg-gray-100 border-2 border-gray-300 p-6 rounded-lg text-center text-gray-600">
+              <p>Enter Price and GST % above to see the breakdown</p>
+            </div>
+          )}
 
           <div>
             <label className="block font-semibold mb-4">Use Cases</label>

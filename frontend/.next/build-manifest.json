@@ -5,8 +5,8 @@
   "devFiles": [],
   "ampDevFiles": [],
   "lowPriorityFiles": [
-    "static/Y46scMchkm-68kt7jTChi/_buildManifest.js",
-    "static/Y46scMchkm-68kt7jTChi/_ssgManifest.js"
+    "static/reZap32ZmFatOuaB3_2cF/_buildManifest.js",
+    "static/reZap32ZmFatOuaB3_2cF/_ssgManifest.js"
   ],
   "rootMainFiles": [],
   "pages": {
@@ -22,7 +22,7 @@
       "static/chunks/webpack-ee7e63bc15b31913.js",
       "static/chunks/framework-64ad27b21261a9ce.js",
       "static/chunks/main-4b423ec82b590a3f.js",
-      "static/css/3fb0d9a6fbc06d33.css",
+      "static/css/7aa9141df8744924.css",
       "static/chunks/pages/_app-bd197d5442d82a43.js"
     ],
     "/_error": [
@@ -45,7 +45,7 @@
       "static/chunks/main-4b423ec82b590a3f.js",
       "static/chunks/675-68ae5ec6e834e7cb.js",
       "static/chunks/542-cbab4c59309fddf7.js",
-      "static/chunks/pages/admin/add-product-efdb5e56d9fb434a.js"
+      "static/chunks/pages/admin/add-product-16df58be4d9041c7.js"
     ],
     "/admin/edit-product": [
       "static/chunks/webpack-ee7e63bc15b31913.js",
@@ -61,7 +61,7 @@
       "static/chunks/main-4b423ec82b590a3f.js",
       "static/chunks/675-68ae5ec6e834e7cb.js",
       "static/chunks/542-cbab4c59309fddf7.js",
-      "static/chunks/pages/admin/edit-product/[id]-2ef199207643056e.js"
+      "static/chunks/pages/admin/edit-product/[id]-5fcb4f346faad869.js"
     ],
     "/cart": [
       "static/chunks/webpack-ee7e63bc15b31913.js",
