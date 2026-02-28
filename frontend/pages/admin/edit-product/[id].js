@@ -287,6 +287,18 @@ export default function EditProduct() {
             </p>
           </div>
 
+          <div>
+            <label className="block font-semibold mb-2">Image URLs (comma-separated)</label>
+            <input
+              type="text"
+              value={formData.images?.join(',') || ''}
+              onChange={(e) => setFormData({ ...formData, images: e.target.value.split(',').map(i => i.trim()).filter(i => i) })}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
+              placeholder="https://image1.jpg, https://image2.jpg"
+              required
+            />
+          </div>
+
           <div className="flex gap-4">
             <button
               type="submit"
