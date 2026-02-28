@@ -288,7 +288,7 @@ export default function EditProduct() {
           </div>
 
           <div>
-            <label className="block font-semibold mb-2">Image URLs (comma-separated)</label>
+            <label className="block font-semibold mb-2">📁 Image URLs (comma-separated)</label>
             <input
               type="text"
               value={formData.images?.join(',') || ''}
@@ -297,6 +297,34 @@ export default function EditProduct() {
               placeholder="https://image1.jpg, https://image2.jpg"
               required
             />
+            <small className="text-gray-500 mt-1 block">💡 Enter image URLs separated by commas. Each URL will be used as a product image.</small>
+            
+            {formData.images && formData.images.length > 0 && (
+              <div className="mt-4">
+                <p className="font-semibold mb-3">Preview ({formData.images.length} image{formData.images.length !== 1 ? 's' : ''}):</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {formData.images.map((img, idx) => (
+                    img && (
+                      <div key={idx} className="relative">
+                        <img 
+                          src={img} 
+                          alt={`Preview ${idx + 1}`}
+                          className="w-full h-40 object-cover rounded border border-gray-300"
+                          onError={(e) => {e.target.src = ''; e.target.innerHTML = '<div class="flex items-center justify-center h-40 bg-gray-100 text-gray-400">❌ Image not found</div>';}}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, images: formData.images.filter((_, i) => i !== idx) })}
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 text-sm"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex gap-4">
