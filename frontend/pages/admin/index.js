@@ -293,7 +293,7 @@ export default function AdminDashboard() {
                         </span>
                       </td>
                       <td className="px-4 py-2">
-                        <a href={`/admin/edit-product?id=${product._id}`} className="text-blue-600 hover:underline mr-3">
+                        <a href={`/admin/edit-product/${product._id}`} className="text-blue-600 hover:underline mr-3">
                           ✏️ Edit
                         </a>
                         <button
