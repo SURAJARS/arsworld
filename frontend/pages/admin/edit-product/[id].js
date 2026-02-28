@@ -24,11 +24,13 @@ export default function EditProduct() {
       console.log('📝 Loading product:', id);
       const res = await productAPI.getById(id);
       console.log('✅ Product loaded:', res.data);
-      // Ensure gstPercentage is included (default to 18 if missing)
+      // Ensure all fields are properly structured
       const productData = {
         ...res.data,
-        gstPercentage: res.data.gstPercentage || 18
+        gstPercentage: res.data.gstPercentage || 18,
+        images: Array.isArray(res.data.images) ? res.data.images.filter(img => img && img.trim()) : [],
       };
+      console.log('📸 Images loaded:', productData.images);
       setFormData(productData);
     } catch (err) {
       console.error('❌ Error loading product:', err);
