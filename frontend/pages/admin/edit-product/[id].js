@@ -243,22 +243,6 @@ export default function EditProduct() {
             </div>
           )}
 
-          <div>
-            <label className="block font-semibold mb-2">GST Percentage (%)</label>
-            <input
-              type="number"
-              name="gstPercentage"
-              min="0"
-              max="100"
-              step="0.1"
-              value={formData.gstPercentage || 18}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-              placeholder="e.g., 18"
-            />
-            <small className="text-gray-500 mt-1 block">Common rates: 5%, 12%, 18%, 28%</small>
-          </div>
-
           <div className="bg-blue-50 p-6 rounded-lg border-2 border-blue-200">
             <h3 className="text-lg font-bold mb-4">🔧 Product Status</h3>
             <div className="space-y-4">
